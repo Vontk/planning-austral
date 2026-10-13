@@ -16,9 +16,9 @@ Si el navegador no se abre automáticamente, usá la dirección que aparece en l
 
 ## Usar
 
-1. Elegí fecha y campus: los horarios se cargan automáticamente.
+1. Elegí fecha (o usá **Hoy** / **Mañana**) y campus: los horarios se cargan automáticamente.
 2. En **Buscar materias**, escribí el nombre: `analisis 2` encuentra `Análisis Matemático II`. Ignora tildes y mayúsculas, reconoce números romanos I–X y tolera pequeños errores.
-3. En **Aulas libres**, elegí la hora de inicio y fin. En Pilar, busca por defecto en Olivo A/B, Roble y Ceibo; podés ampliar a todas las aulas del campus.
+3. En **Buscar aula vacía**, elegí la hora de inicio y fin. En Pilar, busca por defecto en Olivo A/B, Roble y Ceibo; podés ampliar a todas las aulas del campus. El rango elegido aparece una sola vez en el resumen de resultados.
 
 Los resultados corresponden al día elegido. “Disponible” significa sin reservas registradas durante todo el intervalo; no garantiza que el aula esté físicamente vacía. La app sincroniza cada cinco minutos mientras está visible, al volver después de cinco minutos y al recuperar conexión. Si una carga falla, reintenta automáticamente. Materia, intervalo y edificio filtran los datos del día inmediatamente.
 
