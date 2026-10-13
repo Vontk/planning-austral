@@ -11,6 +11,8 @@ import time
 import webbrowser
 import os
 import socket
+import errno
+import json
 
 BASE = 'https://planning-campus.austral.edu.ar:44443/'
 HTML = Path(__file__).with_name('index.html')
@@ -73,6 +75,9 @@ class Handler(BaseHTTPRequestHandler):
         if url.path in ('/', '/index.html'):
             body = HTML.read_text(encoding='utf-8').replace('__PLANNING_SESSION__', self.server.token)
             self.reply(200, body.encode(), 'text/html; charset=utf-8')
+            return
+        if url.path == '/api/health':
+            self.reply(200, b'{"app":"campus-lookup"}', 'application/json')
             return
         if url.path == '/logo.svg':
             self.reply(200, HTML.with_name('logo.svg').read_bytes(), 'image/svg+xml')
@@ -139,7 +144,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--port', type=int, default=0, help='Puerto opcional (predeterminado: uno libre)')
+    parser.add_argument('--port', type=int, default=18787, help='Puerto local (predeterminado: 18787; 0 para uno temporal)')
     parser.add_argument('--socket-activation', action='store_true', help='Inicio desde el favorito instalado con systemd')
     parser.add_argument('--no-browser', action='store_true', help='No abrir otra pestaña')
     args = parser.parse_args()
@@ -153,6 +158,18 @@ def main():
     try:
         server = PlanningServer(('127.0.0.1', args.port), inherited)
     except OSError as error:
+        # Si el favorito ya tiene este puerto, reutilizarlo sin abrir otro servidor.
+        if error.errno == errno.EADDRINUSE and not args.socket_activation and not args.no_browser:
+            existing = f'http://127.0.0.1:{args.port}/'
+            try:
+                with urlopen(existing + 'api/health', timeout=10) as response:
+                    known = json.loads(response.read(1024)).get('app') == 'campus-lookup'
+                if known:
+                    print(f'Abriendo {existing} (servidor local existente)', flush=True)
+                    webbrowser.open(existing)
+                    return
+            except Exception:
+                pass
         parser.exit(1, f'No se pudo iniciar el servidor: {error}\n')
     url = f'http://127.0.0.1:{server.server_port}/'
     print(f'Abriendo {url}', flush=True)

@@ -7,6 +7,8 @@ import sys
 import threading
 import time
 import unittest
+from unittest.mock import patch, MagicMock
+import errno
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
@@ -39,6 +41,10 @@ class LocalServerTests(unittest.TestCase):
         with urlopen(self.base + 'logo.svg') as r:
             self.assertEqual(r.headers['Content-Type'], 'image/svg+xml')
             self.assertIn(b'<circle', r.read())
+
+    def test_health_identifies_local_app_without_session(self):
+        with urlopen(self.base + 'api/health') as response:
+            self.assertEqual(response.read(), b'{"app":"campus-lookup"}')
 
     def test_unauthorized_session(self):
         with self.assertRaises(HTTPError) as result:
@@ -74,9 +80,19 @@ class LocalServerTests(unittest.TestCase):
         app.server_close()
 
 
+class LauncherTests(unittest.TestCase):
+    def test_manual_launch_reuses_stable_bookmark_server(self):
+        response = MagicMock()
+        response.__enter__.return_value.read.return_value = b'{"app":"campus-lookup"}'
+        with patch.object(sys, 'argv', ['server.py']), patch.object(server, 'PlanningServer', side_effect=OSError(errno.EADDRINUSE, 'busy')), patch.object(server, 'urlopen', return_value=response) as read, patch.object(server.webbrowser, 'open') as open_browser:
+            server.main()
+            read.assert_called_once_with('http://127.0.0.1:18787/api/health', timeout=10)
+            open_browser.assert_called_once_with('http://127.0.0.1:18787/')
+
+
 class LifecycleTests(unittest.TestCase):
     def test_reload_multiple_tabs_and_shutdown(self):
-        p = subprocess.Popen([sys.executable, '-u', str(ROOT / 'server.py'), '--no-browser'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        p = subprocess.Popen([sys.executable, '-u', str(ROOT / 'server.py'), '--no-browser', '--port', '0'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         try:
             line = p.stdout.readline().strip()
             self.assertTrue(line.startswith('Abriendo '), line)

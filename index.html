@@ -63,7 +63,7 @@ button { cursor: pointer; }
 .tabs { display: flex; gap: 0; margin: 22px 0 18px; border-bottom: 1px solid var(--line); background: var(--surface); }
 .tabs button { border: 0; border-right: 1px solid var(--line); background: var(--tab); color: var(--muted); padding: 11px 18px; border-top: 1px solid transparent; }
 .tabs button[aria-selected=true] { color: var(--text); background: var(--background); border-top-color: var(--purple); }
-#q { font-size: 14px; width: 100%; margin: 9px 0; }
+#q, #roomQuery { font-size: 14px; width: 100%; margin: 9px 0; }
 input::placeholder { color: #949494; }
 .hint, footer { font-size: 11px; color: var(--muted); line-height: 1.7; }
 #status { font-size: 11px; color: var(--muted); margin-top: 12px; line-height: 1.6; }
@@ -73,6 +73,8 @@ input::placeholder { color: #949494; }
 #results { display: grid; grid-template-columns: repeat(auto-fit,minmax(270px,1fr)); gap: 0; border-top: 1px solid var(--line); }
 .card { background: transparent; border-bottom: 1px solid var(--line); padding: 16px 18px 16px 0; overflow-wrap: anywhere; }
 .card h3 { margin: 10px 0; font-size: 14px; font-weight: 400; color: var(--blue); line-height: 1.5; }
+.schedule-booking { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+.schedule-booking h4 { font-size: 12px; font-weight: 400; line-height: 1.6; margin: 6px 0; color: var(--text); }
 .badge { color: var(--green); font-size: 11px; }
 .card p { font-size: 12px; line-height: 1.7; margin: 7px 0; color: var(--secondary); }
 .card a { color: var(--purple); font-size: 11px; text-decoration: none; }
@@ -87,12 +89,13 @@ a { color: var(--blue); }
 input:focus, select:focus, button:focus-visible { outline: 1px solid var(--blue); outline-offset: -1px; }
 @keyframes pulse { 50% { opacity: .25; } }
 @media(prefers-reduced-motion:reduce) { #status.loading:before { animation: none; } }
-@media(max-width:520px) { header,main { padding-left: 16px; padding-right: 16px; } .tabs button { flex: 1; padding: 11px 8px; } #results { grid-template-columns: 1fr; } }
+@media(max-width:520px) { .tabs { flex-wrap: wrap; } header,main { padding-left: 16px; padding-right: 16px; } .tabs button { flex: 1; padding: 11px 8px; } #results { grid-template-columns: 1fr; } }
 </style>
 <header><h1><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>campus lookup</h1><button id="theme" type="button">Tema claro</button></header><main>
 <section class="panel"><div class="row"><div class="date-field"><label for="date">Fecha</label><div class="date-controls"><input id="date" type="date" required><button id="today" type="button">Hoy</button><button id="tomorrow" type="button">Mañana</button></div></div><label>Campus<select id="campus"><option>Pilar</option><option value="Bs. As.">Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label></div><div id="status" role="status" aria-live="polite">Conectando con Planning…</div></section>
-<div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">Buscar materias</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false" tabindex="-1">Buscar aula vacía</button></div>
+<div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">Buscar materias</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false" tabindex="-1">Buscar aula vacía</button><button id="roomSchedule" role="tab" aria-controls="scheduleForm" aria-selected="false" tabindex="-1">Buscar aula</button></div>
 <section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="hint">Tildes, mayúsculas y números romanos resueltos automáticamente.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><div class="time-field"><label for="from">Desde</label><div class="time-controls"><input id="from" type="time" value="12:00" required><button id="now" type="button">Ahora</button></div></div><div class="time-field"><label for="to">Hasta</label><div class="time-controls"><input id="to" type="time" value="14:00" required></div><div class="duration"><label for="hours">+</label><input id="hours" type="text" inputmode="decimal" value="2" aria-label="Duración en horas" autocomplete="off"><span>horas desde el inicio</span></div></div><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div><p id="intervalHint" class="hint" role="status"></p></div></section>
+<section id="scheduleForm" class="panel" role="tabpanel" aria-labelledby="roomSchedule" hidden><label for="roomQuery">Aula</label><input id="roomQuery" type="search" placeholder="R2, C8.1, B7, Ceibo…" autocomplete="off"><p class="hint">Reservas del aula para la fecha seleccionada.</p></section>
 <h2 id="count">Cargando…</h2><div id="results" aria-live="polite"></div><footer><a href="https://planning-campus.austral.edu.ar:44443/" target="_blank" rel="noopener">planning.austral ↗</a> · UTC−3 · Actualización automática<br>Libre = sin reservas registradas; no garantiza que el aula esté vacía.</footer></main>
 <script>
 const BASE = 'https://planning-campus.austral.edu.ar:44443/';
@@ -268,14 +271,42 @@ function card(title, tag, lines, url, description) {
   if (description) {const d = document.createElement('details'), s = document.createElement('summary'); s.textContent = 'Detalle de la reserva'; d.append(s, document.createTextNode(description)); el.append(d);}
   return el;
 }
+function roomCode(room) {
+  const match = tidy(room.name).match(/^(?:aula\s+)?([abcr])\s*(\d+(?:[.,]\d+)?)\b/i);
+  return match ? match[1].toUpperCase() + match[2].replace(',', '.') : null;
+}
+function isPhysicalClassroom(room) {
+  return !/virtual|online|deportes|exterior/.test(norm(room.areaName))
+    && !/online|oficina|deposito/.test(norm(room.name))
+    && (/^aula\b/.test(norm(room.name)) || !!roomCode(room));
+}
+function bookingLabel(booking) {
+  const startDate = relativeDate(0, new Date(booking.start)), endDate = relativeDate(0, new Date(booking.end));
+  return startDate === endDate ? `${clock(booking.start)} — ${clock(booking.end)}` : `${startDate} ${clock(booking.start)} — ${endDate} ${clock(booking.end)}`;
+}
+function roomSearchScore(room, query) {
+  const code = roomCode(room), compact = query.trim().replace(/\s+/g, '').toUpperCase();
+  if (code && code.toUpperCase() === compact) return -1;
+  return score(room.full, query);
+}
 function overlaps(booking, start, end) { return booking.start < end && booking.end > start; }
 function availableRooms(rooms, bookings, range) {
-  const known = new Set(rooms.map(r => norm(r.full))), byRoom = new Map(), unmatched = [];
-  for (const b of bookings) {
-    const key = norm(b.room);
+  const exact = new Map(rooms.map(r => [norm(r.full), r]));
+  const byRoom = new Map(), unmatched = [];
+  for (const booking of bookings) {
+    let room = exact.get(norm(booking.room));
+    if (!room) {
+      const candidates = rooms.filter(r => {
+        if (!norm(booking.room).startsWith(norm(r.areaName) + ' ')) return false;
+        const name = booking.room.slice(r.areaName.length).replace(/^\s*-\s*/, '');
+        return roomCode(r) && roomCode({name}) === roomCode(r);
+      });
+      if (candidates.length === 1) room = candidates[0];
+    }
+    if (!room) { if (overlaps(booking, range.start, range.end)) unmatched.push(booking); continue; }
+    const key = norm(room.full);
     if (!byRoom.has(key)) byRoom.set(key, []);
-    byRoom.get(key).push(b);
-    if (!known.has(key) && overlaps(b, range.start, range.end)) unmatched.push(b);
+    byRoom.get(key).push(booking);
   }
   return {byRoom, unmatched};
 }
@@ -296,15 +327,39 @@ function render() {
       const tag = dates ? `${relativeDate(0, new Date(b.start))} ${clock(b.start)} — ${relativeDate(0, new Date(b.end))} ${clock(b.end)}` : `${clock(b.start)} — ${clock(b.end)}`;
       $('results').append(card(b.title, tag, [b.room], room ? link(room) : null, b.description));
     }
+  } else if (mode === 'roomSchedule') {
+    const query = $('roomQuery').value.trim();
+    if (!query) { $('count').textContent = 'Ingresá el aula o edificio que querés consultar'; return; }
+    const start = Date.parse(data.date + 'T00:00:00-03:00'), end = start + 86400000;
+    const {byRoom, unmatched} = availableRooms(data.rooms, data.bookings, {start, end});
+    const found = data.rooms.filter(isPhysicalClassroom).map(room => ({room, score: roomSearchScore(room, query)}))
+      .filter(item => Number.isFinite(item.score)).sort((a, b) => a.score - b.score || a.room.full.localeCompare(b.room.full, 'es', {numeric:true}));
+    $('count').textContent = `${found.length} ${found.length === 1 ? "aula encontrada" : "aulas encontradas"} · ${data.date}`;
+    for (const {room} of found) {
+      const bookings = (byRoom.get(norm(room.full)) || []).filter(b => overlaps(b, start, end)).sort((a, b) => a.start - b.start);
+      const uncertain = unmatched.some(b => norm(b.room).startsWith(norm(room.areaName) + ' '));
+      const lines = [room.areaName];
+      if (!bookings.length) lines.push(uncertain ? 'Sin reservas asociadas; hay reservas del edificio sin aula identificada.' : 'Sin reservas registradas para esta fecha');
+      const el = card(room.name, null, lines, link(room));
+      for (const booking of bookings) {
+        const item = document.createElement('section'); item.className = 'schedule-booking';
+        const time = document.createElement('span'); time.className = 'badge'; time.textContent = bookingLabel(booking);
+        const title = document.createElement('h4'); title.textContent = booking.title;
+        item.append(time, title);
+        if (booking.description) {
+          const details = document.createElement('details'), summary = document.createElement('summary');
+          summary.textContent = 'Detalle'; details.append(summary, document.createTextNode(booking.description)); item.append(details);
+        }
+        el.append(item);
+      }
+      $('results').append(el);
+    }
   } else {
     const range = currentInterval();
     if (!range) {$('count').textContent = 'Ingresá un inicio válido y una duración entre 1 minuto y 24 horas'; return;}
-    const rooms = data.rooms.filter(r => {
-      const area = norm(r.areaName), name = norm(r.name);
-      return !/virtual|online|deportes|exterior/.test(area) && !/oficina|deposito|laboratorio|\blab\b|biolab|taller|sala|auditorio|online/.test(name)
-        && (/aula/.test(name) || /olivo/.test(area) && /^[abc]\s*\d/.test(name))
-        && ($('campus').value !== 'Pilar' || $('building').value === 'all' || /olivo.*modulo [ab]\b|edificio roble|edificio ceibo/.test(area));
-    });
+    const rooms = data.rooms.filter(r => isPhysicalClassroom(r)
+      && ($('campus').value !== 'Pilar' || $('building').value === 'all'
+        || (!!roomCode(r) && /olivo.*modulo [ab]\b|edificio roble|edificio ceibo/.test(norm(r.areaName)))));
     const {byRoom, unmatched} = availableRooms(data.rooms, data.bookings, range);
     let unknown = 0, free = [];
     for (const room of rooms) {
@@ -387,17 +442,21 @@ $('to').addEventListener('input', () => {
   $('hours').value = Number.isFinite(delta) ? String(Math.round(delta / 60 * 1000000) / 1000000) : '';
   updateRange();
 });
-for (const id of ['q', 'building']) $(id).addEventListener('input', render);
+for (const id of ['q', 'roomQuery', 'building']) $(id).addEventListener('input', render);
+const tabs = ['subjects', 'rooms', 'roomSchedule'];
 function selectTab(tab) {
   mode = tab;
-  for (const id of ['subjects', 'rooms']) {$(id).setAttribute('aria-selected', String(mode === id)); $(id).tabIndex = mode === id ? 0 : -1;}
-  $('subjectForm').hidden = mode !== 'subjects'; $('roomForm').hidden = mode !== 'rooms'; render();
+  for (const id of tabs) {$(id).setAttribute('aria-selected', String(mode === id)); $(id).tabIndex = mode === id ? 0 : -1;}
+  $('subjectForm').hidden = mode !== 'subjects'; $('roomForm').hidden = mode !== 'rooms'; $('scheduleForm').hidden = mode !== 'roomSchedule'; render();
 }
-for (const tab of ['subjects', 'rooms']) {
+for (const tab of tabs) {
   $(tab).onclick = () => selectTab(tab);
   $(tab).onkeydown = e => {
     if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
-    e.preventDefault(); const next = e.key === 'Home' ? 'subjects' : e.key === 'End' ? 'rooms' : mode === 'subjects' ? 'rooms' : 'subjects'; selectTab(next); $(next).focus();
+    e.preventDefault();
+    const index = tabs.indexOf(mode), delta = e.key === 'ArrowLeft' ? -1 : 1;
+    const next = e.key === 'Home' ? tabs[0] : e.key === 'End' ? tabs[tabs.length - 1] : tabs[(index + delta + tabs.length) % tabs.length];
+    selectTab(next); $(next).focus();
   };
 }
 addEventListener('online', load);

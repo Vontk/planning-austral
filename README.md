@@ -8,7 +8,7 @@ Buscador de materias y aulas libres de Austral. Sin login ni paquetes externos. 
 python3 server.py
 ```
 
-Abre tu navegador predeterminado. Al cerrar la última pestaña de la app, Python termina unos segundos después. Recargar no lo cierra. También podés terminarlo con `Ctrl+C`.
+Abre tu navegador predeterminado en **http://127.0.0.1:18787/**. Si la integración de favoritos ya está activa, reutiliza ese servidor. Al cerrar la última pestaña de la app, Python termina unos segundos después. Recargar no lo cierra. También podés terminarlo con `Ctrl+C`.
 
 ## Abrir desde la barra de favoritos
 
@@ -24,6 +24,8 @@ python3 install_bookmark.py
 
 **En esta computadora ya está configurado el inicio automático. Solo falta guardar el favorito.**
 
+No guardes URLs temporales como `http://127.0.0.1:40875/`: pertenecen a una ejecución anterior y dejan de responder al cerrar Python. El puerto estable de este setup es **18787**.
+
 Python termina al cerrar la última pestaña. Linux conserva el punto de entrada local para poder volver a iniciarlo: no queda un proceso de Python ejecutándose entre usos. Funciona después de volver a iniciar sesión. No expone la app a otras computadoras.
 
 Si movés la carpeta, volvé a ejecutar el setup. Si el puerto está ocupado, usá `python3 install_bookmark.py --port 18788` y guardá la dirección que indique. Para desinstalar esta integración:
@@ -38,10 +40,11 @@ Un HTML o favorito común no puede ejecutar un archivo Python por su ruta. La in
 
 - Elegí fecha o **Hoy / Mañana**, y campus. Los datos se cargan automáticamente.
 - **Buscar materias**: `analisis 2` encuentra `Análisis Matemático II`. Ignora tildes y mayúsculas, reconoce romanos I–X y tolera pequeños errores. Distingue el número de la materia del de la comisión.
+- **Buscar aula**: escribí `R2`, `C8.1`, `B7` o un edificio. Muestra las reservas de cada aula para la fecha seleccionada, ordenadas por hora, y también aulas sin reservas. Incluye laboratorios y talleres que figuran como aulas numeradas.
 - **Buscar aula vacía**: elegí **Desde** o pulsá **Ahora**. Ahora selecciona la fecha y hora actuales de Buenos Aires.
 - En **Hasta**, podés editar la hora o poner **+ N horas** desde el inicio: acepta `1,5`, `1.5` y `0.5`. La duración mínima es un minuto y la máxima 24 horas; se redondea al minuto más cercano.
 - Si termina al día siguiente, lo indica y consulta las reservas de ambos días. Una hora final anterior al inicio se interpreta como el día siguiente. Para un intervalo de exactamente 24 horas, escribí `24` en la duración.
-- En Pilar se busca por defecto en Olivo A/B, Roble y Ceibo. En otros campus busca sus aulas; no aplica edificios de Pilar. Se excluyen laboratorios, talleres, oficinas, salas y espacios virtuales o exteriores.
+- En Pilar se busca por defecto en Olivo A/B, Roble y Ceibo, con códigos A/B/C/R seguidos de un número (también decimales como B11.1). Un aula numerada no se excluye por llamarse Lab, Biolab o Taller. SUM queda fuera de ese alcance; **Todas las aulas** amplía el inventario. En otros campus se usan sus propias aulas. Se excluyen oficinas y espacios virtuales o exteriores.
 - **Tema claro / Tema oscuro** cambia la paleta y recuerda tu elección cuando el navegador permite guardar preferencias. La lupa es también el icono de la pestaña.
 
 Libre significa **sin reservas registradas**; no garantiza que el aula esté físicamente vacía. Los horarios son de Buenos Aires (UTC−3).
@@ -65,10 +68,14 @@ node tests/app.test.cjs
 python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
-Node solo es necesario para ejecutar las pruebas del buscador, no para usar la app. Las pruebas cubren comisiones, fechas UTC−3, cambio de año, decimales, medianoche, límites de reservas, CSV, cambio rápido de filtros y tema claro sin almacenamiento. Pasaron 11 pruebas de JavaScript y 7 de Python. También se comprobó el inicio, cierre y reinicio desde favoritos con systemd y la interfaz con datos reales en Brave.
+Node solo es necesario para ejecutar las pruebas del buscador, no para usar la app. Las pruebas cubren comisiones, fechas UTC−3, cambio de año, decimales, medianoche, límites de reservas, CSV, cambio rápido de filtros y tema claro sin almacenamiento. Pasaron 13 pruebas de JavaScript y 9 de Python. También se comprobó el inicio, cierre y reinicio desde favoritos con systemd y la interfaz con datos reales en Brave.
 
-Capturas: [tema oscuro](docs/dark.jpg) · [tema claro](docs/light.jpg).
+Capturas: [tema oscuro](docs/dark.jpg) · [tema claro](docs/light.jpg) · [conteo corregido](docs/availability-fixed.jpg) · [reservas por aula](docs/room-schedule.jpg).
 
 ## Compartir
 
 El [repositorio es privado](https://github.com/Vontk/planning-austral). Para acceder hay que ser colaborador invitado; el enlace por sí solo no concede acceso.
+
+## Corrección del conteo
+
+El filtro anterior excluía R1, R4, R5, R7, C5, C6 y C7 por contener “Lab”, “Biolab” o “Taller”. Se corrigió para usar el código del aula. En la auditoría del 13/10/2026, de 14:23 a 16:23, se verificaron seis aulas sin reservas: R4, R7, C2, C5, C6 y C7. El inventario habitual pasó de 41 a 47 (48 del original menos SUM). Estos son resultados históricos de esa consulta, no disponibilidad garantizada para otro momento.
