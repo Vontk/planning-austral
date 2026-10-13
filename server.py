@@ -146,6 +146,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=18787, help='Puerto local (predeterminado: 18787; 0 para uno temporal)')
     parser.add_argument('--socket-activation', action='store_true', help='Inicio desde el favorito instalado con systemd')
+    parser.add_argument('--nokill', action='store_true', help='Seguir ejecutándose al cerrar las pestañas; terminar con Ctrl+C')
+    parser.add_argument('--launchd-activation', action='store_true', help='Inicio desde el setup de macOS')
     parser.add_argument('--no-browser', action='store_true', help='No abrir otra pestaña')
     args = parser.parse_args()
     inherited = None
@@ -153,6 +155,22 @@ def main():
         if os.environ.get('LISTEN_PID') != str(os.getpid()) or os.environ.get('LISTEN_FDS') != '1':
             parser.error('No se recibió el socket de systemd. Usá python3 server.py para abrir manualmente.')
         inherited = socket.socket(fileno=3)
+        if inherited.getsockname()[0] != '127.0.0.1':
+            parser.error('El socket debe escuchar solamente en 127.0.0.1.')
+    if args.launchd_activation:
+        import ctypes
+        library = ctypes.CDLL('/usr/lib/libSystem.B.dylib')
+        activate = library.launch_activate_socket
+        activate.argtypes = [ctypes.c_char_p, ctypes.POINTER(ctypes.POINTER(ctypes.c_int)), ctypes.POINTER(ctypes.c_size_t)]
+        activate.restype = ctypes.c_int
+        fds, count = ctypes.POINTER(ctypes.c_int)(), ctypes.c_size_t()
+        result = activate(b'Listener', ctypes.byref(fds), ctypes.byref(count))
+        if result or count.value != 1:
+            parser.error(f'No se recibió el socket de launchd ({result}).')
+        fd = fds[0]
+        library.free.argtypes = [ctypes.c_void_p]
+        library.free(fds)
+        inherited = socket.socket(fileno=fd)
         if inherited.getsockname()[0] != '127.0.0.1':
             parser.error('El socket debe escuchar solamente en 127.0.0.1.')
     try:
@@ -166,6 +184,8 @@ def main():
                     known = json.loads(response.read(1024)).get('app') == 'campus-lookup'
                 if known:
                     print(f'Abriendo {existing} (servidor local existente)', flush=True)
+                    if args.nokill:
+                        parser.exit(1, 'Ya hay una instancia activa. Cerrá las pestañas y usá --port 18788 --nokill para iniciar una instancia manual separada.\n')
                     webbrowser.open(existing)
                     return
             except Exception:
@@ -173,9 +193,10 @@ def main():
         parser.exit(1, f'No se pudo iniciar el servidor: {error}\n')
     url = f'http://127.0.0.1:{server.server_port}/'
     print(f'Abriendo {url}', flush=True)
-    print('Cerrá la pestaña para terminar. También podés usar Ctrl+C.', flush=True)
-    threading.Thread(target=server.watch_browser, daemon=True).start()
-    if not args.no_browser and not args.socket_activation:
+    print('Terminar con Ctrl+C.' if args.nokill else 'Cerrá la última pestaña para terminar. También podés usar Ctrl+C.', flush=True)
+    if not args.nokill:
+        threading.Thread(target=server.watch_browser, daemon=True).start()
+    if not args.no_browser and inherited is None:
         threading.Thread(target=webbrowser.open, args=(url,), daemon=True).start()
     try:
         server.serve_forever(poll_interval=0.25)

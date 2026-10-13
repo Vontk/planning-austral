@@ -75,7 +75,13 @@ input::placeholder { color: #949494; }
 .card h3 { margin: 10px 0; font-size: 14px; font-weight: 400; color: var(--blue); line-height: 1.5; }
 .subject-filters { margin: 10px 0; }
 .academic-filter { flex: 1; min-width: 180px; }
-.academic-filter input { margin: 7px 0; }
+.academic-picker { position: relative; margin-top: 7px; }
+.academic-picker input { padding-right: 30px; cursor: text; }
+.picker-arrow { position: absolute; right: 11px; top: 9px; pointer-events: none; color: var(--muted); }
+.picker-options { position: absolute; z-index: 10; width: 100%; max-height: 240px; overflow-y: auto; background: var(--input); border: 1px solid var(--line); box-shadow: 0 5px 12px #0004; }
+.picker-options button { display: block; width: 100%; text-align: left; border: 0; padding: 9px 10px; }
+.picker-options button:hover, .picker-options button.active { background: var(--surface); color: var(--blue); }
+.picker-empty { padding: 10px; color: var(--muted); }
 .academic-label { color: var(--purple); font-size: 11px; line-height: 1.6; margin: 6px 0; }
 .schedule-booking { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
 .schedule-booking h4 { font-size: 12px; font-weight: 400; line-height: 1.6; margin: 6px 0; color: var(--text); }
@@ -98,7 +104,7 @@ input:focus, select:focus, button:focus-visible { outline: 1px solid var(--blue)
 <header><h1><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>campus lookup</h1><button id="theme" type="button">Tema claro</button></header><main>
 <section class="panel"><div class="row"><div class="date-field"><label for="date">Fecha</label><div class="date-controls"><input id="date" type="date" required><button id="today" type="button">Hoy</button><button id="tomorrow" type="button">Mañana</button></div></div><label>Campus<select id="campus"><option>Pilar</option><option value="Bs. As.">Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label></div><div id="status" role="status" aria-live="polite">Conectando con Planning…</div></section>
 <div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">Buscar materias</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false" tabindex="-1">Buscar aula vacía</button><button id="roomSchedule" role="tab" aria-controls="scheduleForm" aria-selected="false" tabindex="-1">Buscar aula</button></div>
-<section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="row subject-filters"><div class="academic-filter"><label for="faculty">Facultad / unidad</label><input id="facultySearch" type="search" aria-label="Buscar facultad o unidad" placeholder="Buscar facultad…" autocomplete="off"><select id="faculty"><option value="">Todas</option></select></div><div class="academic-filter"><label for="career">Carrera / programa</label><input id="careerSearch" type="search" aria-label="Buscar carrera o programa" placeholder="Buscar carrera…" autocomplete="off"><select id="career"><option value="">Todas</option></select></div></div><div class="hint">Búsqueda sin tildes ni mayúsculas. Las carreras corresponden a la clasificación de Planning.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><div class="time-field"><label for="from">Desde</label><div class="time-controls"><input id="from" type="time" value="12:00" required><button id="now" type="button">Ahora</button></div></div><div class="time-field"><label for="to">Hasta</label><div class="time-controls"><input id="to" type="time" value="14:00" required></div><div class="duration"><label for="hours">+</label><input id="hours" type="text" inputmode="decimal" value="2" aria-label="Duración en horas" autocomplete="off"><span>horas desde el inicio</span></div></div><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div><p id="intervalHint" class="hint" role="status"></p></div></section>
+<section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="row subject-filters"><div class="academic-filter"><label for="facultySearch">Facultad / unidad</label><div class="academic-picker"><input id="facultySearch" type="text" role="combobox" aria-label="Facultad / unidad" aria-autocomplete="list" aria-expanded="false" aria-controls="facultyOptions" autocomplete="off" value="Todas"><span class="picker-arrow" aria-hidden="true">⌄</span><div id="facultyOptions" class="picker-options" role="listbox" aria-label="Opciones de facultad" hidden></div></div><select id="faculty" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div><div class="academic-filter"><label for="careerSearch">Carrera / programa</label><div class="academic-picker"><input id="careerSearch" type="text" role="combobox" aria-label="Carrera / programa" aria-autocomplete="list" aria-expanded="false" aria-controls="careerOptions" autocomplete="off" value="Todas"><span class="picker-arrow" aria-hidden="true">⌄</span><div id="careerOptions" class="picker-options" role="listbox" aria-label="Opciones de carrera" hidden></div></div><select id="career" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div></div><div class="hint">Búsqueda sin tildes ni mayúsculas. Las carreras corresponden a la clasificación de Planning.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><div class="time-field"><label for="from">Desde</label><div class="time-controls"><input id="from" type="time" value="12:00" required><button id="now" type="button">Ahora</button></div></div><div class="time-field"><label for="to">Hasta</label><div class="time-controls"><input id="to" type="time" value="14:00" required></div><div class="duration"><label for="hours">+</label><input id="hours" type="text" inputmode="decimal" value="2" aria-label="Duración en horas" autocomplete="off"><span>horas desde el inicio</span></div></div><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div><p id="intervalHint" class="hint" role="status"></p></div></section>
 <section id="scheduleForm" class="panel" role="tabpanel" aria-labelledby="roomSchedule" hidden><label for="roomQuery">Aula</label><input id="roomQuery" type="search" placeholder="R2, C8.1, B7, Ceibo…" autocomplete="off"><p class="hint">Reservas del aula para la fecha seleccionada.</p></section>
 <h2 id="count">Cargando…</h2><div id="results" aria-live="polite"></div><footer><a href="https://planning-campus.austral.edu.ar:44443/" target="_blank" rel="noopener">planning.austral ↗</a> · UTC−3 · Actualización automática<br>Libre = sin reservas registradas; no garantiza que el aula esté vacía.</footer></main>
 <script>
@@ -283,10 +289,7 @@ function resetOptions(select, values, emptyLabel, label = value => value) {
   const previous = select.value;
   select.replaceChildren();
   const all = document.createElement('option'); all.value = ''; all.textContent = emptyLabel; select.append(all);
-  const query = norm($(select.id + 'Search')?.value || '');
   for (const value of values) {
-    const actual = value || '__unclassified__';
-    if (query && actual !== previous && !norm(value ? label(value) : 'Sin clasificación').includes(query)) continue;
     const option = document.createElement('option'); option.value = value || '__unclassified__'; option.textContent = value ? label(value) : 'Sin clasificación'; select.append(option);
   }
   select.value = [...select.children].some(o => o.value === previous) ? previous : '';
@@ -298,6 +301,7 @@ function updateAcademicFilters() {
   resetOptions($('faculty'), units, 'Todas');
   const careers = [...new Set(bookings.filter(b => classificationMatches(b.faculty, $('faculty').value)).map(b => b.career || ''))].sort((a, b) => careerLabel(a).localeCompare(careerLabel(b), 'es'));
   resetOptions($('career'), careers, 'Todas', careerLabel);
+  for (const id of ['faculty', 'career']) refreshPicker(id);
 }
 function subjectMatches(booking) {
   return classificationMatches(booking.faculty, $('faculty').value) && classificationMatches(booking.career, $('career').value);
@@ -505,7 +509,61 @@ $('to').addEventListener('input', () => {
 });
 $('faculty').addEventListener('change', () => { $('career').value = ''; updateAcademicFilters(); render(); });
 $('career').addEventListener('change', render);
-for (const id of ['facultySearch', 'careerSearch']) $(id).addEventListener('input', updateAcademicFilters);
+const pickers = new Map();
+function selectedLabel(id) {
+  return [...$(id).children].find(o => o.value === $(id).value)?.textContent || 'Todas';
+}
+function refreshPicker(id) {
+  const state = pickers.get(id); if (!state) return;
+  if (!state.open) { $(id + 'Search').value = selectedLabel(id); return; }
+  const list = $(id + 'Options'), query = norm($(id + 'Search').value);
+  const options = [...$(id).children].filter(o => !query || norm(o.textContent).includes(query));
+  state.options = options; state.active = -1; list.replaceChildren();
+  $(id + 'Search').removeAttribute('aria-activedescendant');
+  for (const [index, option] of options.entries()) {
+    const button = document.createElement('button'); button.type = 'button'; button.tabIndex = -1;
+    button.id = id + '-option-' + index; button.textContent = option.textContent;
+    button.setAttribute('role', 'option'); button.setAttribute('aria-selected', String(option.value === $(id).value));
+    button.addEventListener('mousedown', event => event.preventDefault());
+    button.addEventListener('click', () => choosePicker(id, index)); list.append(button);
+  }
+  if (!options.length) { const empty = document.createElement('div'); empty.className = 'picker-empty'; empty.textContent = 'Sin coincidencias'; list.append(empty); }
+}
+function closePicker(id) {
+  const state = pickers.get(id); state.open = false; $(id + 'Options').hidden = true;
+  $(id + 'Search').setAttribute('aria-expanded', 'false'); $(id + 'Search').removeAttribute('aria-activedescendant');
+  $(id + 'Search').value = selectedLabel(id);
+}
+function openPicker(id) {
+  for (const other of pickers.keys()) if (other !== id) closePicker(other);
+  const state = pickers.get(id); if (state.open) return;
+  state.open = true; $(id + 'Search').value = ''; $(id + 'Search').setAttribute('aria-expanded', 'true');
+  $(id + 'Options').hidden = false; refreshPicker(id);
+}
+function choosePicker(id, index) {
+  const option = pickers.get(id).options[index]; if (!option) return;
+  $(id).value = option.value; closePicker(id); $(id).dispatchEvent(new Event('change'));
+}
+for (const id of ['faculty', 'career']) {
+  pickers.set(id, {open:false, active:-1, options:[]});
+  const input = $(id + 'Search');
+  input.addEventListener('focus', () => openPicker(id));
+  input.addEventListener('click', () => openPicker(id));
+  input.addEventListener('input', () => { if (!pickers.get(id).open) openPicker(id); refreshPicker(id); });
+  input.addEventListener('blur', () => closePicker(id));
+  input.addEventListener('keydown', event => {
+    const state = pickers.get(id);
+    if (event.key === 'Escape' || event.key === 'Tab') { closePicker(id); return; }
+    if (event.key === 'Enter') { event.preventDefault(); if (!state.open) openPicker(id); else choosePicker(id, state.active >= 0 ? state.active : 0); return; }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault(); openPicker(id); if (!state.options.length) return;
+    const last = state.options.length - 1;
+    state.active = event.key === 'Home' ? 0 : event.key === 'End' ? last : (state.active < 0 ? (event.key === 'ArrowUp' ? last : 0) : (state.active + (event.key === 'ArrowUp' ? -1 : 1) + state.options.length) % state.options.length);
+    const buttons = [...$(id + 'Options').children];
+    buttons.forEach((button, index) => { button.className = index === state.active ? 'active' : ''; });
+    input.setAttribute('aria-activedescendant', buttons[state.active].id); buttons[state.active].scrollIntoView({block:'nearest'});
+  });
+}
 for (const id of ['q', 'roomQuery', 'building']) $(id).addEventListener('input', render);
 const tabs = ['subjects', 'rooms', 'roomSchedule'];
 function selectTab(tab) {
