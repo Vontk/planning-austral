@@ -78,7 +78,7 @@ WantedBy=sockets.target
         run('is-active', '--quiet', f'{NAME}.socket')
     except subprocess.CalledProcessError:
         parser.exit(1, f'No se pudo activar el favorito; quizás el puerto {args.port} está ocupado. Probá --port con otro número.\n')
-    print(f'Listo. Guardá este enlace en la barra de favoritos: http://127.0.0.1:{args.port}/')
+    print(f'Listo. Guardá este enlace en la barra de favoritos: http://campus-lookup.localhost:{args.port}/')
     print('Al abrirlo inicia Python en esa misma pestaña. Al cerrar la última pestaña, Python termina.')
     print('Si movés esta carpeta, volvé a ejecutar este setup.')
 

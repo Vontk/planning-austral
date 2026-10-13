@@ -74,6 +74,8 @@ input::placeholder { color: #949494; }
 .card { background: transparent; border-bottom: 1px solid var(--line); padding: 16px 18px 16px 0; overflow-wrap: anywhere; }
 .card h3 { margin: 10px 0; font-size: 14px; font-weight: 400; color: var(--blue); line-height: 1.5; }
 .subject-filters { margin: 10px 0; }
+.academic-filter { flex: 1; min-width: 180px; }
+.academic-filter input { margin: 7px 0; }
 .academic-label { color: var(--purple); font-size: 11px; line-height: 1.6; margin: 6px 0; }
 .schedule-booking { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
 .schedule-booking h4 { font-size: 12px; font-weight: 400; line-height: 1.6; margin: 6px 0; color: var(--text); }
@@ -96,7 +98,7 @@ input:focus, select:focus, button:focus-visible { outline: 1px solid var(--blue)
 <header><h1><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>campus lookup</h1><button id="theme" type="button">Tema claro</button></header><main>
 <section class="panel"><div class="row"><div class="date-field"><label for="date">Fecha</label><div class="date-controls"><input id="date" type="date" required><button id="today" type="button">Hoy</button><button id="tomorrow" type="button">Mañana</button></div></div><label>Campus<select id="campus"><option>Pilar</option><option value="Bs. As.">Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label></div><div id="status" role="status" aria-live="polite">Conectando con Planning…</div></section>
 <div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">Buscar materias</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false" tabindex="-1">Buscar aula vacía</button><button id="roomSchedule" role="tab" aria-controls="scheduleForm" aria-selected="false" tabindex="-1">Buscar aula</button></div>
-<section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="row subject-filters"><label for="faculty">Facultad / unidad<select id="faculty"><option value="">Todas</option></select></label><label for="career">Carrera / programa<select id="career"><option value="">Todas</option></select></label></div><div class="hint">Búsqueda sin tildes ni mayúsculas. Las carreras corresponden a la clasificación de Planning.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><div class="time-field"><label for="from">Desde</label><div class="time-controls"><input id="from" type="time" value="12:00" required><button id="now" type="button">Ahora</button></div></div><div class="time-field"><label for="to">Hasta</label><div class="time-controls"><input id="to" type="time" value="14:00" required></div><div class="duration"><label for="hours">+</label><input id="hours" type="text" inputmode="decimal" value="2" aria-label="Duración en horas" autocomplete="off"><span>horas desde el inicio</span></div></div><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div><p id="intervalHint" class="hint" role="status"></p></div></section>
+<section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="row subject-filters"><div class="academic-filter"><label for="faculty">Facultad / unidad</label><input id="facultySearch" type="search" aria-label="Buscar facultad o unidad" placeholder="Buscar facultad…" autocomplete="off"><select id="faculty"><option value="">Todas</option></select></div><div class="academic-filter"><label for="career">Carrera / programa</label><input id="careerSearch" type="search" aria-label="Buscar carrera o programa" placeholder="Buscar carrera…" autocomplete="off"><select id="career"><option value="">Todas</option></select></div></div><div class="hint">Búsqueda sin tildes ni mayúsculas. Las carreras corresponden a la clasificación de Planning.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><div class="time-field"><label for="from">Desde</label><div class="time-controls"><input id="from" type="time" value="12:00" required><button id="now" type="button">Ahora</button></div></div><div class="time-field"><label for="to">Hasta</label><div class="time-controls"><input id="to" type="time" value="14:00" required></div><div class="duration"><label for="hours">+</label><input id="hours" type="text" inputmode="decimal" value="2" aria-label="Duración en horas" autocomplete="off"><span>horas desde el inicio</span></div></div><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div><p id="intervalHint" class="hint" role="status"></p></div></section>
 <section id="scheduleForm" class="panel" role="tabpanel" aria-labelledby="roomSchedule" hidden><label for="roomQuery">Aula</label><input id="roomQuery" type="search" placeholder="R2, C8.1, B7, Ceibo…" autocomplete="off"><p class="hint">Reservas del aula para la fecha seleccionada.</p></section>
 <h2 id="count">Cargando…</h2><div id="results" aria-live="polite"></div><footer><a href="https://planning-campus.austral.edu.ar:44443/" target="_blank" rel="noopener">planning.austral ↗</a> · UTC−3 · Actualización automática<br>Libre = sin reservas registradas; no garantiza que el aula esté vacía.</footer></main>
 <script>
@@ -281,7 +283,10 @@ function resetOptions(select, values, emptyLabel, label = value => value) {
   const previous = select.value;
   select.replaceChildren();
   const all = document.createElement('option'); all.value = ''; all.textContent = emptyLabel; select.append(all);
+  const query = norm($(select.id + 'Search')?.value || '');
   for (const value of values) {
+    const actual = value || '__unclassified__';
+    if (query && actual !== previous && !norm(value ? label(value) : 'Sin clasificación').includes(query)) continue;
     const option = document.createElement('option'); option.value = value || '__unclassified__'; option.textContent = value ? label(value) : 'Sin clasificación'; select.append(option);
   }
   select.value = [...select.children].some(o => o.value === previous) ? previous : '';
@@ -500,6 +505,7 @@ $('to').addEventListener('input', () => {
 });
 $('faculty').addEventListener('change', () => { $('career').value = ''; updateAcademicFilters(); render(); });
 $('career').addEventListener('change', render);
+for (const id of ['facultySearch', 'careerSearch']) $(id).addEventListener('input', updateAcademicFilters);
 for (const id of ['q', 'roomQuery', 'building']) $(id).addEventListener('input', render);
 const tabs = ['subjects', 'rooms', 'roomSchedule'];
 function selectTab(tab) {

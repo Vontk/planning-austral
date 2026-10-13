@@ -69,7 +69,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         url = urlsplit(self.path)
-        if self.headers.get('Host') != f'127.0.0.1:{self.server.server_port}':
+        if self.headers.get('Host') not in {f'{host}:{self.server.server_port}' for host in ('127.0.0.1', 'localhost', 'campus-lookup.localhost')}:
             self.reply(403, b'Host no permitido', 'text/plain')
             return
         if url.path in ('/', '/index.html'):
