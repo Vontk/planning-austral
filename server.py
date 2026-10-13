@@ -9,6 +9,8 @@ import secrets
 import threading
 import time
 import webbrowser
+import os
+import socket
 
 BASE = 'https://planning-campus.austral.edu.ar:44443/'
 HTML = Path(__file__).with_name('index.html')
@@ -25,8 +27,14 @@ class PublicPlanningOnly(HTTPRedirectHandler):
 class PlanningServer(ThreadingHTTPServer):
     daemon_threads = True
 
-    def __init__(self, address):
-        super().__init__(address, Handler)
+    def __init__(self, address, inherited_socket=None):
+        super().__init__(address, Handler, bind_and_activate=inherited_socket is None)
+        if inherited_socket is not None:
+            self.socket.close()
+            self.socket = inherited_socket
+            self.server_address = inherited_socket.getsockname()
+            self.server_name = '127.0.0.1'
+            self.server_port = self.server_address[1]
         self.token = secrets.token_urlsafe(32)
         self.lock = threading.Lock()
         self.connections = 0
@@ -66,11 +74,14 @@ class Handler(BaseHTTPRequestHandler):
             body = HTML.read_text(encoding='utf-8').replace('__PLANNING_SESSION__', self.server.token)
             self.reply(200, body.encode(), 'text/html; charset=utf-8')
             return
+        if url.path == '/logo.svg':
+            self.reply(200, HTML.with_name('logo.svg').read_bytes(), 'image/svg+xml')
+            return
         if url.path == '/api/session':
             token = parse_qs(url.query).get('token', [''])[0]
         else:
             token = self.headers.get('X-Planning-Session', '')
-        if not secrets.compare_digest(token, self.server.token):
+        if not token.isascii() or not secrets.compare_digest(token, self.server.token):
             self.reply(403, b'Sesion no permitida', 'text/plain')
             return
         if url.path == '/api/session':
@@ -120,19 +131,35 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('Content-Length', str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError):
+            pass  # El navegador canceló una carga anterior.
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--port', type=int, default=0, help='Puerto opcional (predeterminado: uno libre)')
+    parser.add_argument('--socket-activation', action='store_true', help='Inicio desde el favorito instalado con systemd')
+    parser.add_argument('--no-browser', action='store_true', help='No abrir otra pestaña')
     args = parser.parse_args()
-    server = PlanningServer(('127.0.0.1', args.port))
+    inherited = None
+    if args.socket_activation:
+        if os.environ.get('LISTEN_PID') != str(os.getpid()) or os.environ.get('LISTEN_FDS') != '1':
+            parser.error('No se recibió el socket de systemd. Usá python3 server.py para abrir manualmente.')
+        inherited = socket.socket(fileno=3)
+        if inherited.getsockname()[0] != '127.0.0.1':
+            parser.error('El socket debe escuchar solamente en 127.0.0.1.')
+    try:
+        server = PlanningServer(('127.0.0.1', args.port), inherited)
+    except OSError as error:
+        parser.exit(1, f'No se pudo iniciar el servidor: {error}\n')
     url = f'http://127.0.0.1:{server.server_port}/'
     print(f'Abriendo {url}', flush=True)
     print('Cerrá la pestaña para terminar. También podés usar Ctrl+C.', flush=True)
     threading.Thread(target=server.watch_browser, daemon=True).start()
-    threading.Thread(target=webbrowser.open, args=(url,), daemon=True).start()
+    if not args.no_browser and not args.socket_activation:
+        threading.Thread(target=webbrowser.open, args=(url,), daemon=True).start()
     try:
         server.serve_forever(poll_interval=0.25)
     except KeyboardInterrupt:

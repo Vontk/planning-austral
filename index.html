@@ -1,11 +1,15 @@
-<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Planning Austral · Materias y aulas</title>
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>campus lookup</title><link id="favicon" rel="icon" type="image/svg+xml" href="/logo.svg">
 <style>
 :root {
   color-scheme: dark;
   font-family: Consolas, "Cascadia Code", "Liberation Mono", monospace;
   font-size: 13px;
-  color: #d4d4d4;
-  background: #1e1e1e;
+  color: var(--text);
+  background: var(--background);
+  --background: #1e1e1e;
+  --text: #d4d4d4;
+  --tab: #2d2d2d;
+  --secondary: #bdbdbd;
   --surface: #252526;
   --input: #313131;
   --line: #3c3c3c;
@@ -15,26 +19,50 @@
   --green: #b5cea8;
   --orange: #cead96;
 }
+html[data-theme="light"] {
+  color-scheme: light;
+  --background: #f3f3f3;
+  --text: #333333;
+  --tab: #e7e7e7;
+  --secondary: #555555;
+  --surface: #ececec;
+  --input: #ffffff;
+  --line: #cccccc;
+  --muted: #626262;
+  --blue: #246b93;
+  --purple: #77519c;
+  --green: #496b37;
+  --orange: #91552f;
+}
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 body { margin: 0; }
 header, main { max-width: 1000px; margin: auto; padding: 0 24px; }
-header { padding-top: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
-h1 { font-size: 22px; margin: 10px 0 0; font-weight: 400; letter-spacing: -.03em; color: var(--blue); }
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; padding-top: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+h1 { display: flex; align-items: center; gap: 10px; font-size: 22px; margin: 10px 0 0; font-weight: 400; letter-spacing: -.03em; color: var(--blue); }
+.logo { width: 24px; height: 24px; flex-shrink: 0; }
+#theme { font-size: 11px; white-space: nowrap; }
+.time-field { flex: 1; min-width: 180px; }
+.time-controls { display: flex; align-items: center; gap: 6px; margin-top: 7px; }
+.time-controls input { flex: 1; width: 0; }
+.duration { display: flex; align-items: center; gap: 7px; margin-top: 9px; color: var(--muted); font-size: 11px; }
+.duration label { display: inline; min-width: 0; flex: none; font-size: 11px; color: var(--muted); }
+#hours { width: 70px; padding: 6px; }
+#intervalHint { margin: 8px 0 0; }
 main { padding-top: 20px; }
 .panel { margin-bottom: 18px; }
 .date-field { flex: 1; min-width: 280px; }
 .date-controls { display: flex; gap: 6px; margin-top: 7px; }
 .date-controls input { flex: 1; width: 0; }
 .date-controls button { padding: 9px; }
-.row { display: flex; gap: 14px; flex-wrap: wrap; align-items: end; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; align-items: start; }
 label { display: flex; flex-direction: column; gap: 7px; font-size: 12px; color: var(--blue); flex: 1; min-width: 140px; }
-input, select, button { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 0; background: var(--input); color: #d4d4d4; }
+input, select, button { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 0; background: var(--input); color: var(--text); }
 input, select { min-width: 0; width: 100%; }
 button { cursor: pointer; }
 .tabs { display: flex; gap: 0; margin: 22px 0 18px; border-bottom: 1px solid var(--line); background: var(--surface); }
-.tabs button { border: 0; border-right: 1px solid var(--line); background: #2d2d2d; color: var(--muted); padding: 11px 18px; border-top: 1px solid transparent; }
-.tabs button[aria-selected=true] { color: #dedede; background: #1e1e1e; border-top-color: var(--purple); }
+.tabs button { border: 0; border-right: 1px solid var(--line); background: var(--tab); color: var(--muted); padding: 11px 18px; border-top: 1px solid transparent; }
+.tabs button[aria-selected=true] { color: var(--text); background: var(--background); border-top-color: var(--purple); }
 #q { font-size: 14px; width: 100%; margin: 9px 0; }
 input::placeholder { color: #949494; }
 .hint, footer { font-size: 11px; color: var(--muted); line-height: 1.7; }
@@ -46,7 +74,7 @@ input::placeholder { color: #949494; }
 .card { background: transparent; border-bottom: 1px solid var(--line); padding: 16px 18px 16px 0; overflow-wrap: anywhere; }
 .card h3 { margin: 10px 0; font-size: 14px; font-weight: 400; color: var(--blue); line-height: 1.5; }
 .badge { color: var(--green); font-size: 11px; }
-.card p { font-size: 12px; line-height: 1.7; margin: 7px 0; color: #bdbdbd; }
+.card p { font-size: 12px; line-height: 1.7; margin: 7px 0; color: var(--secondary); }
 .card a { color: var(--purple); font-size: 11px; text-decoration: none; }
 .card a:hover, footer a:hover { text-decoration: underline; }
 details { margin-top: 12px; font-size: 11px; line-height: 1.7; white-space: pre-wrap; color: var(--muted); }
@@ -61,93 +89,318 @@ input:focus, select:focus, button:focus-visible { outline: 1px solid var(--blue)
 @media(prefers-reduced-motion:reduce) { #status.loading:before { animation: none; } }
 @media(max-width:520px) { header,main { padding-left: 16px; padding-right: 16px; } .tabs button { flex: 1; padding: 11px 8px; } #results { grid-template-columns: 1fr; } }
 </style>
-<header><h1>campus lookup</h1></header><main>
-<section class="panel"><div class="row"><div class="date-field"><label for="date">Fecha</label><div class="date-controls"><input id="date" type="date" required><button id="today" type="button">Hoy</button><button id="tomorrow" type="button">Mañana</button></div></div><label>Campus<select id="campus"><option>Pilar</option><option>Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label></div><div id="status" role="status" aria-live="polite">Conectando con Planning…</div></section>
-<div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">Buscar materias</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false">Buscar aula vacía</button></div>
-<section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="hint">Tildes, mayúsculas y números romanos resueltos automáticamente.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><label>Desde<input id="from" type="time" value="12:00" required></label><label>Hasta<input id="to" type="time" value="14:00" required></label><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div></div></section>
+<header><h1><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>campus lookup</h1><button id="theme" type="button">Tema claro</button></header><main>
+<section class="panel"><div class="row"><div class="date-field"><label for="date">Fecha</label><div class="date-controls"><input id="date" type="date" required><button id="today" type="button">Hoy</button><button id="tomorrow" type="button">Mañana</button></div></div><label>Campus<select id="campus"><option>Pilar</option><option value="Bs. As.">Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label></div><div id="status" role="status" aria-live="polite">Conectando con Planning…</div></section>
+<div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">Buscar materias</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false" tabindex="-1">Buscar aula vacía</button></div>
+<section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="hint">Tildes, mayúsculas y números romanos resueltos automáticamente.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><div class="time-field"><label for="from">Desde</label><div class="time-controls"><input id="from" type="time" value="12:00" required><button id="now" type="button">Ahora</button></div></div><div class="time-field"><label for="to">Hasta</label><div class="time-controls"><input id="to" type="time" value="14:00" required></div><div class="duration"><label for="hours">+</label><input id="hours" type="text" inputmode="decimal" value="2" aria-label="Duración en horas" autocomplete="off"><span>horas desde el inicio</span></div></div><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div><p id="intervalHint" class="hint" role="status"></p></div></section>
 <h2 id="count">Cargando…</h2><div id="results" aria-live="polite"></div><footer><a href="https://planning-campus.austral.edu.ar:44443/" target="_blank" rel="noopener">planning.austral ↗</a> · UTC−3 · Actualización automática<br>Libre = sin reservas registradas; no garantiza que el aula esté vacía.</footer></main>
 <script>
-const BASE='https://planning-campus.austral.edu.ar:44443/';
-const SESSION='__PLANNING_SESSION__';
-let sessionStream;
-function connectSession(){if(location.protocol==='file:')return;sessionStream=new EventSource('/api/session?token='+encodeURIComponent(SESSION));}
-connectSession();
-addEventListener('pagehide',()=>sessionStream?.close());
-addEventListener('pageshow',e=>{if(e.persisted)connectSession();});
-const $=id=>document.getElementById(id);let data=null,mode='subjects',loadedDate='',loadedCampus='',loadVersion=0,loadController=null,refreshTimer=null,lastLoadedAt=0;
-function relativeDate(days=0){
-  const parts=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Argentina/Buenos_Aires',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date());
-  const date=Object.fromEntries(parts.map(p=>[p.type,p.value]));
-  return new Date(Date.UTC(Number(date.year),Number(date.month)-1,Number(date.day)+days)).toISOString().slice(0,10);
+const BASE = 'https://planning-campus.austral.edu.ar:44443/';
+const SESSION = '__PLANNING_SESSION__';
+const $ = id => document.getElementById(id);
+let data = null, mode = 'subjects', loadVersion = 0, loadController = null;
+let refreshTimer, lastLoadedAt = 0, sessionStream, pendingKey = '', failedKey = '';
+const tz = 'America/Argentina/Buenos_Aires';
+function relativeDate(days = 0, now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit'}).formatToParts(now);
+  const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
+  return new Date(Date.UTC(+p.year, +p.month - 1, +p.day + days)).toISOString().slice(0, 10);
 }
-$('date').value=relativeDate();
-const norm=s=>String(s).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\b(x|ix|viii|vii|vi|v|iv|iii|ii|i)\b/g,v=>({i:1,ii:2,iii:3,iv:4,v:5,vi:6,vii:7,viii:8,ix:9,x:10}[v])).replace(/[^a-z0-9]+/g,' ').trim();
-const tidy=s=>String(s).replace(/\s+/g,' ').trim();
-function distance(a,b){let v=Array.from({length:b.length+1},(_,i)=>i);for(let i=0;i<a.length;i++){let n=[i+1];for(let j=0;j<b.length;j++)n[j+1]=Math.min(n[j]+1,v[j+1]+1,v[j]+(a[i]!==b[j]));v=n;}return v[b.length];}
-function score(title,q){let ts=norm(title).split(' '),qs=norm(q).split(' ').filter(Boolean);if(!qs.length)return 1;let total=0;for(let w of qs){let best=Infinity;for(let t of ts){let s=w===t?0:(!/^\d+$/.test(w)&&t.startsWith(w)?0.2:(!/^\d+$/.test(w)&&w.length>=4?distance(w,t):Infinity));if(s<=Math.max(1,Math.floor(w.length*.22)))best=Math.min(best,s);}if(best===Infinity)return Infinity;total+=best;}return total;}
-function csv(s){let rows=[],r=[],v='',quoted=false;for(let i=0;i<s.length;i++){let c=s[i];if(c==='"'){if(quoted&&s[i+1]==='"'){v+='"';i++;}else quoted=!quoted;}else if(c===','&&!quoted){r.push(v);v='';}else if((c==='\n'||c==='\r')&&!quoted){if(c==='\r'&&s[i+1]==='\n')i++;r.push(v);if(r.some(Boolean))rows.push(r);r=[];v='';}else v+=c;}if(v||r.length){r.push(v);rows.push(r);}if(quoted)throw Error('CSV incompleto.');return rows;}
-function stamp(s){let months=['january','february','march','april','may','june','july','august','september','october','november','december'];let m=s.match(/(\d{1,2})\s+(\w+)\s+(\d{4})\s+(\d{2}:\d{2}(?::\d{2})?)/);if(!m||months.indexOf(m[2].toLowerCase())<0)throw Error('Formato de fecha desconocido: '+s);return Date.parse(`${m[3]}-${String(months.indexOf(m[2].toLowerCase())+1).padStart(2,'0')}-${m[1].padStart(2,'0')}T${m[4]}-03:00`);}
-async function read(path,signal){const url=location.protocol==='file:'?BASE+path:'/api/planning?path='+encodeURIComponent(path);let r=await fetch(url,{credentials:'omit',headers:location.protocol==='file:'?{}:{'X-Planning-Session':SESSION},cache:'no-store',signal:AbortSignal.any([signal,AbortSignal.timeout(45000)])});if(!r.ok)throw Error('Planning respondió '+r.status);return r.text();}
-const doc=s=>new DOMParser().parseFromString(s,'text/html');
-function parseBookings(s){const rows=csv(s),head=rows.shift()||[],cols=['Area - Room','Brief Description','Start Time - End Time','Full Description'].map(x=>head.indexOf(x));if(cols.slice(0,3).some(x=>x<0))throw Error('Planning no devolvió el reporte público esperado.');return rows.map(r=>{let times=(r[cols[2]]||'').split(' - ');if(times.length!==2)throw Error('Intervalo de reserva desconocido.');return {room:tidy(r[cols[0]]),title:r[cols[1]],start:stamp(times[0]),end:stamp(times[1]),description:cols[3]<0?'':r[cols[3]]};});}
-function dateParams(date=$('date').value){let [year,month,day]=date.split('-');return new URLSearchParams({year,month,day});}
-function link(room){let p=dateParams();p.set('area',room.area);p.set('room',room.id);return BASE+'week.php?'+p;}
-function card(title,tag,lines,url,description){let el=document.createElement('article');el.className='card';if(tag){let b=document.createElement('span');b.className='badge';b.textContent=tag;el.append(b);}let h=document.createElement('h3');h.textContent=title;el.append(h);for(let line of lines){let p=document.createElement('p');p.textContent=line;el.append(p);}if(url){let a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';a.textContent='Ver en Planning ↗';el.append(a);}if(description){let d=document.createElement('details'),s=document.createElement('summary');s.textContent='Detalle de la reserva';d.append(s,document.createTextNode(description));el.append(d);}return el;}
-const clock=t=>new Intl.DateTimeFormat('es-AR',{timeZone:'America/Argentina/Buenos_Aires',hour:'2-digit',minute:'2-digit',hour12:false}).format(t);
-function render(){ $('results').replaceChildren();if(!data||loadedDate!==$('date').value||loadedCampus!==$('campus').value){$('count').textContent=$('date').value?'Cargando horarios…':'Elegí una fecha';return;}if(mode==='subjects'){let found=data.bookings.map(b=>({...b,score:score(b.title,$('q').value)})).filter(b=>isFinite(b.score)).sort((a,b)=>a.score-b.score||a.start-b.start);$('count').textContent=`${found.length} reservas encontradas`;for(let b of found){let room=data.rooms.find(r=>norm(r.full)===norm(b.room));$('results').append(card(b.title,`${clock(b.start)} — ${clock(b.end)}`,[b.room],room?link(room):BASE+'day.php?'+dateParams(),b.description));}}else{let start=Date.parse(loadedDate+'T'+$('from').value+':00-03:00'),end=Date.parse(loadedDate+'T'+$('to').value+':00-03:00');if(!isFinite(start)||!isFinite(end)||end<=start){$('count').textContent='Elegí un intervalo válido: la hora final debe ser posterior';return;}let rooms=data.rooms.filter(r=>{let a=norm(r.areaName),n=norm(r.name);return !/virtual|online|deportes|exterior/.test(a)&&!/oficina|deposito|laboratorio|sala|auditorio/.test(n)&&(/aula/.test(n)||/olivo/.test(a)&&/^[abc]\s*\d/.test(n))&&($('building').value==='all'||/olivo.*modulo [ab]\b|edificio roble|edificio ceibo/.test(a));});let free=[],unknown=0;for(let r of rooms){let bookings=data.bookings.filter(b=>norm(b.room)===norm(r.full));let areaBookings=data.bookings.filter(b=>norm(b.room).startsWith(norm(r.areaName)+' '));let unmatched=areaBookings.filter(b=>!data.rooms.some(x=>norm(x.full)===norm(b.room)));if(unmatched.some(b=>b.start<end&&b.end>start)){unknown++;continue;}if(!bookings.some(b=>b.start<end&&b.end>start)){let next=bookings.filter(b=>b.start>=end).sort((a,b)=>a.start-b.start)[0];free.push({r,next});}}$('count').textContent=`${free.length} aulas vacías de ${rooms.length} aulas · desde ${$('from').value} hasta ${$('to').value}${unknown?' · '+unknown+' sin confirmar':''}`;for(let {r,next} of free){$('results').append(card(r.name,null,[r.areaName,next?`Próxima reserva: ${clock(next.start)} · ${next.title}`:'Sin reservas posteriores en el día'],link(r)));}}if(!$('results').children.length){let p=document.createElement('p');p.className='empty';p.textContent='No encontramos resultados para esta búsqueda.';$('results').append(p);}}
-function scheduleRefresh(delay=300000){clearTimeout(refreshTimer);if(location.protocol!=='file:')refreshTimer=setTimeout(()=>{if(document.visibilityState==='visible')load();else scheduleRefresh();},delay);}
-async function load(){
+function addDays(date, days) {
+  const d = new Date(date + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+const clock = t => new Intl.DateTimeFormat('es-AR', {timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23'}).format(t);
+function minutes(time) {
+  if (!/^\d{2}:\d{2}$/.test(time)) return NaN;
+  const [h, m] = time.split(':').map(Number);
+  return h < 24 && m < 60 ? h * 60 + m : NaN;
+}
+const timeText = m => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+function interval(date, from, hours) {
+  const startMinute = minutes(from), raw = String(hours).trim().replace(',', '.');
+  const duration = /^(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw) ? Number(raw) : NaN;
+  const delta = Math.round(duration * 60);
+  if (!date || !Number.isFinite(startMinute) || !Number.isFinite(duration) || duration <= 0 || duration > 24 || delta < 1) return null;
+  const total = startMinute + delta, dayOffset = Math.floor(total / 1440);
+  const endDate = addDays(date, dayOffset), to = timeText(total);
+  const start = Date.parse(`${date}T${from}:00-03:00`), end = start + delta * 60000;
+  return {start, end, to, endDate, dayOffset, minutes: delta};
+}
+function currentInterval() { return interval($('date').value, $('from').value, $('hours').value); }
+function scope() {
+  const date = $('date').value, campus = $('campus').value, range = currentInterval();
+  // An interval ending at exactly midnight needs no bookings from the following day.
+  const endDate = range ? relativeDate(0, new Date(range.end - 1)) : date;
+  return {date, campus, endDate, key: [date, campus, endDate].join('|')};
+}
+function syncEnd() {
+  const range = currentInterval();
+  $('hours').setAttribute('aria-invalid', String(!range));
+  $('intervalHint').textContent = range ? (range.dayOffset ? `El intervalo termina el ${range.endDate} (día siguiente).` : '') : 'Ingresá una duración de al menos 1 minuto y hasta 24 horas (ej. 1,5).';
+  if (range) $('to').value = range.to;
+}
+function updateRange() { syncEnd(); ensureScope(); }
+function ensureScope() {
+  const wanted = scope();
+  if (!wanted.date || (!data || data.key !== wanted.key) && pendingKey !== wanted.key) load();
+  else render();
+}
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  $('theme').textContent = theme === 'dark' ? 'Tema claro' : 'Tema oscuro';
+  $('theme').setAttribute('aria-label', `Cambiar a tema ${theme === 'dark' ? 'claro' : 'oscuro'}`);
+  const color = theme === 'dark' ? '#9cdcfe' : '#246b93';
+  $('favicon').href = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>`);
+  try { localStorage.setItem('campus-theme', theme); } catch {}
+}
+let savedTheme = 'dark';
+try { if (localStorage.getItem('campus-theme') === 'light') savedTheme = 'light'; } catch {}
+setTheme(savedTheme);
+$('theme').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+function connectSession() {
+  if (location.protocol === 'file:') return;
+  sessionStream?.close();
+  sessionStream = new EventSource('/api/session?token=' + encodeURIComponent(SESSION));
+  sessionStream.onerror = () => {
+    if (sessionStream.readyState !== EventSource.CLOSED) return;
+    $('status').className = 'error';
+    $('status').textContent = 'El servidor local se cerró. Volvé a abrir la app.';
+  };
+}
+connectSession();
+addEventListener('pagehide', () => { sessionStream?.close(); loadController?.abort(); clearTimeout(refreshTimer); });
+addEventListener('pageshow', e => { if (e.persisted) { connectSession(); load(); } });
+$('date').value = relativeDate();
+const tidy = s => String(s ?? '').replace(/\s+/g, ' ').trim();
+const norm = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  .replace(/\b(x|ix|viii|vii|vi|v|iv|iii|ii|i)\b/g, v => ({i:1,ii:2,iii:3,iv:4,v:5,vi:6,vii:7,viii:8,ix:9,x:10}[v]))
+  .replace(/[^a-z0-9]+/g, ' ').trim();
+function distance(a, b) {
+  let v = Array.from({length: b.length + 1}, (_, i) => i);
+  for (let i = 0; i < a.length; i++) {
+    const n = [i + 1];
+    for (let j = 0; j < b.length; j++) n[j + 1] = Math.min(n[j] + 1, v[j + 1] + 1, v[j] + (a[i] !== b[j]));
+    v = n;
+  }
+  return v[b.length];
+}
+function score(title, query) {
+  const words = norm(title).split(' '), terms = norm(query).split(' ').filter(Boolean);
+  const commission = words.findIndex((w, i) => i > 0 && /^(com|comision|grupo|cohorte)$/.test(w));
+  const explicitCommission = terms.some(w => /^(com|comision|grupo|cohorte)$/.test(w));
+  let total = 0;
+  for (const term of terms) {
+    const numeric = /^\d+$/.test(term);
+    const candidates = numeric && commission >= 0 && !explicitCommission ? words.slice(0, commission) : words;
+    let best = Infinity;
+    for (const word of candidates) {
+      const value = term === word ? 0 : (!numeric && word.startsWith(term) ? 0.2 : (!numeric && term.length >= 4 ? distance(term, word) : Infinity));
+      if (value <= Math.max(1, Math.floor(term.length * .22))) best = Math.min(best, value);
+    }
+    if (!Number.isFinite(best)) return Infinity;
+    total += best;
+  }
+  return total;
+}
+function csv(text) {
+  const rows = []; let row = [], value = '', quoted = false;
+  text = text.replace(/^\uFEFF/, '');
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { if (quoted && text[i + 1] === '"') {value += '"'; i++;} else quoted = !quoted; }
+    else if (c === ',' && !quoted) { row.push(value); value = ''; }
+    else if ((c === '\n' || c === '\r') && !quoted) {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(value); if (row.some(Boolean)) rows.push(row); row = []; value = '';
+    } else value += c;
+  }
+  if (value || row.length) {row.push(value); rows.push(row);}
+  if (quoted) throw Error('CSV incompleto.');
+  return rows;
+}
+function stamp(text) {
+  const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+  const m = text.match(/(\d{1,2})\s+(\w+)\s+(\d{4})\s+(\d{2}:\d{2}(?::\d{2})?)/);
+  if (!m || months.indexOf(m[2].toLowerCase()) < 0) throw Error('Formato de fecha desconocido.');
+  const date = `${m[3]}-${String(months.indexOf(m[2].toLowerCase()) + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  const time = m[4].length === 5 ? m[4] + ':00' : m[4];
+  const t = Date.parse(`${date}T${time}-03:00`);
+  if (!Number.isFinite(t) || relativeDate(0, new Date(t)) !== date) throw Error('Fecha de reserva inválida.');
+  return t;
+}
+function parseBookings(text) {
+  const rows = csv(text), head = rows.shift() || [];
+  const cols = ['Area - Room','Brief Description','Start Time - End Time','Full Description'].map(x => head.indexOf(x));
+  if (cols.slice(0, 3).some(x => x < 0)) throw Error('Planning no devolvió el reporte público esperado.');
+  return rows.map(r => {
+    const times = (r[cols[2]] || '').split(' - ');
+    if (times.length !== 2) throw Error('Intervalo de reserva desconocido.');
+    const start = stamp(times[0]), end = stamp(times[1]);
+    if (end <= start) throw Error('Reserva con intervalo inválido.');
+    return {room: tidy(r[cols[0]]), title: r[cols[1]] || '(sin nombre)', start, end, description: cols[3] < 0 ? '' : r[cols[3]]};
+  });
+}
+async function read(path, signal) {
+  const controller = new AbortController(), cancel = () => controller.abort();
+  signal.addEventListener('abort', cancel, {once: true});
+  if (signal.aborted) controller.abort();
+  const timeout = setTimeout(cancel, 45000);
+  try {
+    const response = await fetch('/api/planning?path=' + encodeURIComponent(path), {credentials: 'omit', headers: {'X-Planning-Session': SESSION}, cache: 'no-store', signal: controller.signal});
+    if (!response.ok) throw Error('Planning respondió ' + response.status);
+    return await response.text();
+  } finally { clearTimeout(timeout); signal.removeEventListener('abort', cancel); }
+}
+const doc = text => new DOMParser().parseFromString(text, 'text/html');
+function dateParams(date = $('date').value) {
+  const [year, month, day] = date.split('-');
+  return new URLSearchParams({year, month, day});
+}
+function link(room) { const p = dateParams(); p.set('area', room.area); p.set('room', room.id); return BASE + 'week.php?' + p; }
+function card(title, tag, lines, url, description) {
+  const el = document.createElement('article'); el.className = 'card';
+  if (tag) {const b = document.createElement('span'); b.className = 'badge'; b.textContent = tag; el.append(b);}
+  const h = document.createElement('h3'); h.textContent = title; el.append(h);
+  for (const line of lines) {const p = document.createElement('p'); p.textContent = line; el.append(p);}
+  if (url) {const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Ver en Planning ↗'; el.append(a);}
+  if (description) {const d = document.createElement('details'), s = document.createElement('summary'); s.textContent = 'Detalle de la reserva'; d.append(s, document.createTextNode(description)); el.append(d);}
+  return el;
+}
+function overlaps(booking, start, end) { return booking.start < end && booking.end > start; }
+function availableRooms(rooms, bookings, range) {
+  const known = new Set(rooms.map(r => norm(r.full))), byRoom = new Map(), unmatched = [];
+  for (const b of bookings) {
+    const key = norm(b.room);
+    if (!byRoom.has(key)) byRoom.set(key, []);
+    byRoom.get(key).push(b);
+    if (!known.has(key) && overlaps(b, range.start, range.end)) unmatched.push(b);
+  }
+  return {byRoom, unmatched};
+}
+function render() {
+  $('results').replaceChildren();
+  if (!data || data.key !== scope().key) {
+    $('count').textContent = !$('date').value ? 'Elegí una fecha' : failedKey === scope().key ? 'Sin datos confirmados' : 'Cargando horarios…';
+    return;
+  }
+  if (mode === 'subjects') {
+    const start = Date.parse(data.date + 'T00:00:00-03:00'), end = start + 86400000;
+    const found = data.bookings.filter(b => overlaps(b, start, end)).map(b => ({...b, score: score(b.title, $('q').value)}))
+      .filter(b => Number.isFinite(b.score)).sort((a, b) => a.score - b.score || a.start - b.start);
+    $('count').textContent = `${found.length} reservas encontradas`;
+    for (const b of found) {
+      const room = data.rooms.find(r => norm(r.full) === norm(b.room));
+      const dates = relativeDate(0, new Date(b.start)) !== relativeDate(0, new Date(b.end));
+      const tag = dates ? `${relativeDate(0, new Date(b.start))} ${clock(b.start)} — ${relativeDate(0, new Date(b.end))} ${clock(b.end)}` : `${clock(b.start)} — ${clock(b.end)}`;
+      $('results').append(card(b.title, tag, [b.room], room ? link(room) : null, b.description));
+    }
+  } else {
+    const range = currentInterval();
+    if (!range) {$('count').textContent = 'Ingresá un inicio válido y una duración entre 1 minuto y 24 horas'; return;}
+    const rooms = data.rooms.filter(r => {
+      const area = norm(r.areaName), name = norm(r.name);
+      return !/virtual|online|deportes|exterior/.test(area) && !/oficina|deposito|laboratorio|\blab\b|biolab|taller|sala|auditorio|online/.test(name)
+        && (/aula/.test(name) || /olivo/.test(area) && /^[abc]\s*\d/.test(name))
+        && ($('campus').value !== 'Pilar' || $('building').value === 'all' || /olivo.*modulo [ab]\b|edificio roble|edificio ceibo/.test(area));
+    });
+    const {byRoom, unmatched} = availableRooms(data.rooms, data.bookings, range);
+    let unknown = 0, free = [];
+    for (const room of rooms) {
+      if (unmatched.some(b => norm(b.room).startsWith(norm(room.areaName) + ' '))) {unknown++; continue;}
+      const bookings = byRoom.get(norm(room.full)) || [];
+      if (!bookings.some(b => overlaps(b, range.start, range.end))) {
+        const next = bookings.filter(b => b.start >= range.end).sort((a, b) => a.start - b.start)[0];
+        free.push({room, next});
+      }
+    }
+    const suffix = range.dayOffset ? ` del ${range.endDate}` : '';
+    $('count').textContent = `${free.length} aulas vacías de ${rooms.length} aulas · desde ${$('from').value} hasta ${range.to}${suffix}${unknown ? ' · ' + unknown + ' sin confirmar' : ''}`;
+    for (const {room, next} of free) {
+      const nextDate = next && relativeDate(0, new Date(next.start));
+      const upcoming = next ? `Próxima reserva: ${nextDate !== data.date ? nextDate + ' ' : ''}${clock(next.start)} · ${next.title}` : 'Sin reservas posteriores en los días consultados';
+      $('results').append(card(room.name, null, [room.areaName, upcoming], link(room)));
+    }
+  }
+  if (!$('results').children.length) {const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'No encontramos resultados para esta búsqueda.'; $('results').append(p);}
+}
+function scheduleRefresh(delay = 300000) {
   clearTimeout(refreshTimer);
-  const version=++loadVersion;
-  loadController?.abort();
-  loadController=new AbortController();
-  const signal=loadController.signal,date=$('date').value,campus=$('campus').value;
-  data=null;render();
-  if(!date){$('status').className='';$('status').textContent='Elegí una fecha';return;}
-  $('status').className='loading';$('status').textContent='Sincronizando horarios…';
-  try{
-    let [year,month,day]=date.split('-');
-    let p=new URLSearchParams({From_year:year,From_month:month,From_day:day,To_year:year,To_month:month,To_day:day,areamatch:campus,summarize:'5',sortby:'s',display:'e',sumby:'d'});
-    let [raw,grid]=await Promise.all([read('report.php?'+p,signal),read('day.php?'+dateParams(date),signal)]);
-    let bookings=parseBookings(raw),root=doc(grid);
-    let areas=[...root.querySelectorAll('#dwm_areas option')].map(o=>({id:o.value,name:tidy(o.textContent)})).filter(a=>!campus||norm(a.name).includes(norm(campus)));
-    if(!areas.length)throw Error('No se pudo leer el inventario de áreas para ese campus.');
-    let rooms=[],partial=[];
-    for(let i=0;i<areas.length;i+=4){
-      if(signal.aborted)return;
-      await Promise.all(areas.slice(i,i+4).map(async area=>{
-        try{
-          let p=dateParams(date);p.set('area',area.id);
-          let d=doc(await read('day.php?'+p,signal));
-          let links=[...d.querySelectorAll('thead a[href*="week.php"][href*="room="]')];
-          if(!links.length)throw Error('Sin inventario');
-          for(let a of links){
-            let u=new URL(a.getAttribute('href'),BASE),name=tidy(a.textContent).replace(/\s*\(\d+\)\s*$/,'');
-            rooms.push({id:u.searchParams.get('room'),area:area.id,areaName:area.name,name,full:tidy(area.name+' - '+name)});
+  if (location.protocol !== 'file:') refreshTimer = setTimeout(() => {if (document.visibilityState === 'visible') load(); else scheduleRefresh();}, delay);
+}
+async function load() {
+  clearTimeout(refreshTimer); const version = ++loadVersion;
+  loadController?.abort(); loadController = new AbortController();
+  const signal = loadController.signal, selected = scope(), {date, campus, endDate, key} = selected;
+  pendingKey = key; failedKey = '';
+  if (data?.key !== key) data = null;
+  render();
+  if (!date) {pendingKey = ''; $('status').className = ''; $('status').textContent = 'Elegí una fecha'; return;}
+  if (location.protocol === 'file:') {pendingKey = ''; failedKey = key; $('status').className = 'error'; $('status').textContent = 'Abrí la app con python3 server.py.'; render(); return;}
+  $('status').className = 'loading'; $('status').textContent = 'Sincronizando horarios…';
+  try {
+    const [year, month, day] = date.split('-'), [toYear, toMonth, toDay] = endDate.split('-');
+    const p = new URLSearchParams({From_year:year, From_month:month, From_day:day, To_year:toYear, To_month:toMonth, To_day:toDay, areamatch:campus, summarize:'5', sortby:'s', display:'e', sumby:'d'});
+    const [raw, grid] = await Promise.all([read('report.php?' + p, signal), read('day.php?' + dateParams(date), signal)]);
+    const bookings = parseBookings(raw), root = doc(grid);
+    const areas = [...root.querySelectorAll('#dwm_areas option')].map(o => ({id:o.value, name:tidy(o.textContent)}))
+      .filter(a => !campus || norm(a.name).startsWith(norm(campus) + ' '));
+    if (!areas.length) throw Error('No se pudo leer el inventario de áreas para ese campus.');
+    const rooms = [], partial = [], seen = new Set();
+    for (let i = 0; i < areas.length; i += 4) {
+      if (signal.aborted) return;
+      await Promise.all(areas.slice(i, i + 4).map(async area => {
+        try {
+          const p = dateParams(date); p.set('area', area.id);
+          const d = doc(await read('day.php?' + p, signal));
+          const links = [...d.querySelectorAll('thead a[href*="week.php"][href*="room="]')];
+          if (!links.length) throw Error('Sin inventario');
+          for (const a of links) {
+            const u = new URL(a.getAttribute('href'), BASE), id = u.searchParams.get('room');
+            if (u.searchParams.get('area') !== area.id || !id || seen.has(id)) continue;
+            const name = tidy(a.textContent).replace(/\s*\(\d+\)\s*$/, '');
+            rooms.push({id, area:area.id, areaName:area.name, name, full:tidy(area.name + ' - ' + name)}); seen.add(id);
           }
-        }catch(e){if(signal.aborted)throw e;partial.push(area.name);}
+        } catch (e) {if (signal.aborted) throw e; partial.push(area.name);}
       }));
     }
-    if(version!==loadVersion||signal.aborted)return;
-    data={bookings,rooms};loadedDate=date;loadedCampus=campus;lastLoadedAt=Date.now();
-    $('status').className=partial.length?'error':'';
-    $('status').textContent=`Sync ${clock(lastLoadedAt)} · ${bookings.length} reservas${partial.length?' · Inventario incompleto: '+partial.join(', '):''}`;
-    render();scheduleRefresh(partial.length?30000:300000);
-  }catch(e){
-    if(version!==loadVersion||signal.aborted)return;
-    $('status').className='error';
-    $('status').textContent=location.protocol==='file:'?'Abrí la app con python3 server.py para conectar con Planning.':'Error de conexión. '+e.message+' Reintentando automáticamente…';
-    $('count').textContent='Sin datos confirmados';scheduleRefresh(20000);
+    if (version !== loadVersion || signal.aborted) return;
+    data = {bookings, rooms, date, key}; pendingKey = ''; lastLoadedAt = Date.now();
+    $('status').className = partial.length ? 'error' : '';
+    $('status').textContent = `Sync ${clock(lastLoadedAt)}${partial.length ? ' · Inventario incompleto: ' + partial.join(', ') : ''}`;
+    render(); scheduleRefresh(partial.length ? 30000 : 300000);
+  } catch (e) {
+    if (version !== loadVersion || signal.aborted) return;
+    data = null; pendingKey = ''; failedKey = key;
+    $('status').className = 'error'; $('status').textContent = 'Error de conexión. ' + e.message + ' Reintentando automáticamente…';
+    render(); scheduleRefresh(20000);
   }
 }
-for(const [id,days] of [['today',0],['tomorrow',1]])$(id).onclick=()=>{$('date').value=relativeDate(days);load();};
-for(let id of ['date','campus'])$(id).addEventListener('change',load);
-for(let id of ['q','from','to','building'])$(id).addEventListener('input',render);
-for(let tab of ['subjects','rooms'])$(tab).onclick=()=>{
-  mode=tab;$('subjects').setAttribute('aria-selected',mode==='subjects');$('rooms').setAttribute('aria-selected',mode==='rooms');
-  $('subjectForm').hidden=mode!=='subjects';$('roomForm').hidden=mode!=='rooms';render();
-};
-addEventListener('online',load);
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&Date.now()-lastLoadedAt>=300000)load();});
-load();
+for (const [id, days] of [['today',0], ['tomorrow',1]]) $(id).onclick = () => {$('date').value = relativeDate(days); syncEnd(); load();};
+for (const id of ['date', 'campus']) $(id).addEventListener('change', () => {syncEnd(); $('building').disabled = $('campus').value !== 'Pilar'; if ($('building').disabled) $('building').value = 'all'; load();});
+$('now').onclick = () => {$('date').value = relativeDate(); $('from').value = clock(Date.now()); updateRange();};
+for (const id of ['from', 'hours']) $(id).addEventListener('input', updateRange);
+$('to').addEventListener('input', () => {
+  const start = minutes($('from').value), end = minutes($('to').value);
+  let delta = end - start; if (delta < 0) delta += 1440;
+  $('hours').value = Number.isFinite(delta) ? String(Math.round(delta / 60 * 1000000) / 1000000) : '';
+  updateRange();
+});
+for (const id of ['q', 'building']) $(id).addEventListener('input', render);
+function selectTab(tab) {
+  mode = tab;
+  for (const id of ['subjects', 'rooms']) {$(id).setAttribute('aria-selected', String(mode === id)); $(id).tabIndex = mode === id ? 0 : -1;}
+  $('subjectForm').hidden = mode !== 'subjects'; $('roomForm').hidden = mode !== 'rooms'; render();
+}
+for (const tab of ['subjects', 'rooms']) {
+  $(tab).onclick = () => selectTab(tab);
+  $(tab).onkeydown = e => {
+    if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+    e.preventDefault(); const next = e.key === 'Home' ? 'subjects' : e.key === 'End' ? 'rooms' : mode === 'subjects' ? 'rooms' : 'subjects'; selectTab(next); $(next).focus();
+  };
+}
+addEventListener('online', load);
+document.addEventListener('visibilitychange', () => {if (document.visibilityState === 'visible' && !pendingKey && Date.now() - lastLoadedAt >= 300000) load();});
+syncEnd(); load();
 </script></html>
