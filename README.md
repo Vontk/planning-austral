@@ -39,7 +39,7 @@ Un repositorio privado de GitHub solo es accesible para su dueño y los colabora
 
 ## Interfaz
 
-Tema oscuro, tipografía de terminal y controles mínimos. Al cambiar fecha o campus, se cancela la carga anterior y se consultan los nuevos horarios; las respuestas anteriores no pueden reemplazar la selección actual.
+Estética de IDE: fondo gris oscuro neutro, tipografía monoespaciada, controles planos y acentos pastel azul, lila, verde y durazno. Al cambiar fecha o campus, se cancela la carga anterior y se consultan los nuevos horarios; las respuestas anteriores no pueden reemplazar la selección actual.
 
 ## Comprobaciones realizadas
 

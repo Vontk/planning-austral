@@ -1,10 +1,67 @@
 <!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Planning Austral · Materias y aulas</title>
 <style>
-:root{color-scheme:dark;font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;color:#d4ddd7;background:#0b0e0c;--muted:#86958b;--green:#9eeeab;--line:#28322c}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}header,main{max-width:1000px;margin:auto;padding:0 24px}header{padding-top:40px;padding-bottom:24px;border-bottom:1px solid var(--line)}header small{font-size:12px;color:var(--muted)}h1{font-size:clamp(24px,5vw,36px);margin:12px 0 0;letter-spacing:-.06em;font-weight:500}h1 span{color:var(--green)}main{padding-top:24px}.panel{margin-bottom:20px}.row{display:flex;gap:16px;flex-wrap:wrap;align-items:end}label{display:flex;flex-direction:column;gap:8px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.09em;flex:1;min-width:140px}input,select,button{font:inherit;padding:11px 12px;border:1px solid var(--line);border-radius:4px;background:#111713;color:#d4ddd7}input,select{min-width:0;width:100%}button{cursor:pointer}.tabs{display:flex;gap:0;margin:26px 0 20px;border-bottom:1px solid var(--line)}.tabs button{border:0;border-radius:0;background:transparent;color:var(--muted);padding:12px 18px;border-bottom:2px solid transparent}.tabs button[aria-selected=true]{color:var(--green);border-bottom-color:var(--green)}#q{font-size:17px;width:100%;margin:10px 0}input::placeholder{color:#66756b}.hint,footer{font-size:11px;color:var(--muted);line-height:1.7}#status{font-size:11px;color:var(--muted);margin-top:14px;line-height:1.6}#status:before{content:'● ';color:var(--green)}#status.loading:before{animation:pulse 1s infinite}#status.error{color:#edb792}#status.error:before{color:#edb792}#results{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px}.card{background:#101512;border:1px solid var(--line);padding:18px;border-radius:4px;overflow-wrap:anywhere}.card:hover{border-color:#4d6a55}.card h3{margin:12px 0;font-size:16px;font-weight:500;color:#eef5f0;line-height:1.5}.badge{color:var(--green);font-size:11px}.card p{font-size:12px;line-height:1.7;margin:8px 0;color:#a4b2a9}.card a{color:var(--green);font-size:11px;text-decoration:none}details{margin-top:14px;font-size:11px;line-height:1.7;white-space:pre-wrap;color:var(--muted)}summary{cursor:pointer}footer{margin:28px 0;border-top:1px solid var(--line);padding-top:16px}.empty{padding:24px 0;color:var(--muted);font-size:12px}h2{font-size:12px;font-weight:400;color:var(--muted)}#count{margin:24px 0 14px}a{color:inherit}input:focus,select:focus,button:focus-visible{outline:2px solid var(--green);outline-offset:2px}@keyframes pulse{50%{opacity:.25}}@media(prefers-reduced-motion:reduce){#status.loading:before{animation:none}}@media(max-width:520px){header,main{padding-left:16px;padding-right:16px}header{padding-top:24px}.tabs button{flex:1;padding:12px 8px}#results{grid-template-columns:1fr}}
+:root {
+  color-scheme: dark;
+  font-family: Consolas, "Cascadia Code", "Liberation Mono", monospace;
+  font-size: 13px;
+  color: #d4d4d4;
+  background: #1e1e1e;
+  --surface: #252526;
+  --input: #313131;
+  --line: #3c3c3c;
+  --muted: #a0a0a0;
+  --blue: #9cdcfe;
+  --purple: #c5a5d8;
+  --green: #b5cea8;
+  --orange: #cead96;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+header, main { max-width: 1000px; margin: auto; padding: 0 24px; }
+header { padding-top: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--line); }
+header small { font-size: 11px; color: var(--muted); }
+h1 { font-size: 22px; margin: 10px 0 0; font-weight: 400; letter-spacing: -.03em; color: var(--blue); }
+h1 span { color: var(--purple); }
+main { padding-top: 20px; }
+.panel { margin-bottom: 18px; }
+.row { display: flex; gap: 14px; flex-wrap: wrap; align-items: end; }
+label { display: flex; flex-direction: column; gap: 7px; font-size: 12px; color: var(--blue); flex: 1; min-width: 140px; }
+input, select, button { font: inherit; padding: 9px 10px; border: 1px solid var(--line); border-radius: 0; background: var(--input); color: #d4d4d4; }
+input, select { min-width: 0; width: 100%; }
+button { cursor: pointer; }
+.tabs { display: flex; gap: 0; margin: 22px 0 18px; border-bottom: 1px solid var(--line); background: var(--surface); }
+.tabs button { border: 0; border-right: 1px solid var(--line); background: #2d2d2d; color: var(--muted); padding: 11px 18px; border-top: 1px solid transparent; }
+.tabs button[aria-selected=true] { color: #dedede; background: #1e1e1e; border-top-color: var(--purple); }
+#q { font-size: 14px; width: 100%; margin: 9px 0; }
+input::placeholder { color: #949494; }
+.hint, footer { font-size: 11px; color: var(--muted); line-height: 1.7; }
+#status { font-size: 11px; color: var(--muted); margin-top: 12px; line-height: 1.6; }
+#status:before { content: '● '; color: var(--green); }
+#status.loading:before { color: var(--blue); animation: pulse 1s infinite; }
+#status.error, #status.error:before { color: var(--orange); }
+#results { display: grid; grid-template-columns: repeat(auto-fit,minmax(270px,1fr)); gap: 0; border-top: 1px solid var(--line); }
+.card { background: transparent; border-bottom: 1px solid var(--line); padding: 16px 18px 16px 0; overflow-wrap: anywhere; }
+.card h3 { margin: 10px 0; font-size: 14px; font-weight: 400; color: var(--blue); line-height: 1.5; }
+.badge { color: var(--green); font-size: 11px; }
+.card p { font-size: 12px; line-height: 1.7; margin: 7px 0; color: #bdbdbd; }
+.card a { color: var(--purple); font-size: 11px; text-decoration: none; }
+.card a:hover, footer a:hover { text-decoration: underline; }
+details { margin-top: 12px; font-size: 11px; line-height: 1.7; white-space: pre-wrap; color: var(--muted); }
+summary { cursor: pointer; color: var(--orange); }
+footer { margin: 24px 0; border-top: 1px solid var(--line); padding-top: 12px; }
+.empty { padding: 20px 0; color: var(--muted); font-size: 12px; }
+h2 { font-size: 11px; font-weight: 400; color: var(--muted); }
+#count { margin: 20px 0 12px; }
+a { color: var(--blue); }
+input:focus, select:focus, button:focus-visible { outline: 1px solid var(--blue); outline-offset: -1px; }
+@keyframes pulse { 50% { opacity: .25; } }
+@media(prefers-reduced-motion:reduce) { #status.loading:before { animation: none; } }
+@media(max-width:520px) { header,main { padding-left: 16px; padding-right: 16px; } .tabs button { flex: 1; padding: 11px 8px; } #results { grid-template-columns: 1fr; } }
 </style>
 <header><small>AUSTRAL / PLANNING</small><h1><span>&gt;_</span> campus.lookup</h1></header><main>
 <section class="panel"><div class="row"><label>Fecha<input id="date" type="date" required></label><label>Campus<select id="campus"><option>Pilar</option><option>Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label></div><div id="status" role="status" aria-live="polite">Conectando con Planning…</div></section>
-<div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">01 / materias</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false">02 / aulas libres</button></div>
+<div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">materias.search</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false">aulas.available</button></div>
 <section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="hint">Tildes, mayúsculas y números romanos resueltos automáticamente.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><label>Desde<input id="from" type="time" value="12:00" required></label><label>Hasta<input id="to" type="time" value="14:00" required></label><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div></div></section>
 <h2 id="count">Cargando…</h2><div id="results" aria-live="polite"></div><footer><a href="https://planning-campus.austral.edu.ar:44443/" target="_blank" rel="noopener">planning.austral ↗</a> · UTC−3 · Actualización automática<br>Libre = sin reservas registradas; no garantiza que el aula esté vacía.</footer></main>
 <script>
