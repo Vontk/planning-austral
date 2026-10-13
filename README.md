@@ -36,3 +36,7 @@ El servidor solo escucha en tu computadora y elige un puerto libre. Mantiene una
 ## Compartir
 
 Un repositorio privado de GitHub solo es accesible para su dueño y los colaboradores invitados. Tener el enlace no concede acceso. Los colaboradores pueden descargar o clonar el proyecto y ejecutar `python3 server.py`.
+
+## Comprobaciones realizadas
+
+Se comprobó la lectura de un reporte real de Planning, la búsqueda flexible y el procesamiento de CSV y fechas. También se comprobó que el servidor sigue activo al recargar o mantener otra pestaña abierta, y termina al cerrar la última. La comprobación del ciclo de vida simuló las conexiones del navegador; no se hizo una revisión visual de la interfaz.
