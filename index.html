@@ -73,6 +73,8 @@ input::placeholder { color: #949494; }
 #results { display: grid; grid-template-columns: repeat(auto-fit,minmax(270px,1fr)); gap: 0; border-top: 1px solid var(--line); }
 .card { background: transparent; border-bottom: 1px solid var(--line); padding: 16px 18px 16px 0; overflow-wrap: anywhere; }
 .card h3 { margin: 10px 0; font-size: 14px; font-weight: 400; color: var(--blue); line-height: 1.5; }
+.subject-filters { margin: 10px 0; }
+.academic-label { color: var(--purple); font-size: 11px; line-height: 1.6; margin: 6px 0; }
 .schedule-booking { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
 .schedule-booking h4 { font-size: 12px; font-weight: 400; line-height: 1.6; margin: 6px 0; color: var(--text); }
 .badge { color: var(--green); font-size: 11px; }
@@ -94,7 +96,7 @@ input:focus, select:focus, button:focus-visible { outline: 1px solid var(--blue)
 <header><h1><svg class="logo" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>campus lookup</h1><button id="theme" type="button">Tema claro</button></header><main>
 <section class="panel"><div class="row"><div class="date-field"><label for="date">Fecha</label><div class="date-controls"><input id="date" type="date" required><button id="today" type="button">Hoy</button><button id="tomorrow" type="button">Mañana</button></div></div><label>Campus<select id="campus"><option>Pilar</option><option value="Bs. As.">Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label></div><div id="status" role="status" aria-live="polite">Conectando con Planning…</div></section>
 <div class="tabs" role="tablist" aria-label="Tipo de búsqueda"><button id="subjects" role="tab" aria-controls="subjectForm" aria-selected="true">Buscar materias</button><button id="rooms" role="tab" aria-controls="roomForm" aria-selected="false" tabindex="-1">Buscar aula vacía</button><button id="roomSchedule" role="tab" aria-controls="scheduleForm" aria-selected="false" tabindex="-1">Buscar aula</button></div>
-<section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="hint">Tildes, mayúsculas y números romanos resueltos automáticamente.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><div class="time-field"><label for="from">Desde</label><div class="time-controls"><input id="from" type="time" value="12:00" required><button id="now" type="button">Ahora</button></div></div><div class="time-field"><label for="to">Hasta</label><div class="time-controls"><input id="to" type="time" value="14:00" required></div><div class="duration"><label for="hours">+</label><input id="hours" type="text" inputmode="decimal" value="2" aria-label="Duración en horas" autocomplete="off"><span>horas desde el inicio</span></div></div><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div><p id="intervalHint" class="hint" role="status"></p></div></section>
+<section class="panel"><div id="subjectForm" role="tabpanel" aria-labelledby="subjects"><label for="q">Materia</label><input id="q" type="search" placeholder="analisis 2, álgebra, física…" autocomplete="off"><div class="row subject-filters"><label for="faculty">Facultad / unidad<select id="faculty"><option value="">Todas</option></select></label><label for="career">Carrera / programa<select id="career"><option value="">Todas</option></select></label></div><div class="hint">Búsqueda sin tildes ni mayúsculas. Las carreras corresponden a la clasificación de Planning.</div></div><div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden><div class="row"><div class="time-field"><label for="from">Desde</label><div class="time-controls"><input id="from" type="time" value="12:00" required><button id="now" type="button">Ahora</button></div></div><div class="time-field"><label for="to">Hasta</label><div class="time-controls"><input id="to" type="time" value="14:00" required></div><div class="duration"><label for="hours">+</label><input id="hours" type="text" inputmode="decimal" value="2" aria-label="Duración en horas" autocomplete="off"><span>horas desde el inicio</span></div></div><label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label></div><p id="intervalHint" class="hint" role="status"></p></div></section>
 <section id="scheduleForm" class="panel" role="tabpanel" aria-labelledby="roomSchedule" hidden><label for="roomQuery">Aula</label><input id="roomQuery" type="search" placeholder="R2, C8.1, B7, Ceibo…" autocomplete="off"><p class="hint">Reservas del aula para la fecha seleccionada.</p></section>
 <h2 id="count">Cargando…</h2><div id="results" aria-live="polite"></div><footer><a href="https://planning-campus.austral.edu.ar:44443/" target="_blank" rel="noopener">planning.austral ↗</a> · UTC−3 · Actualización automática<br>Libre = sin reservas registradas; no garantiza que el aula esté vacía.</footer></main>
 <script>
@@ -233,17 +235,67 @@ function stamp(text) {
   if (!Number.isFinite(t) || relativeDate(0, new Date(t)) !== date) throw Error('Fecha de reserva inválida.');
   return t;
 }
+function meaningfulDescription(text, title = '') {
+  return String(text ?? '').split(/\r?\n/).filter(line => {
+    if (!line.trim()) return false;
+    const field = line.match(/^\s*([^:]+):\s*(.*)$/);
+    const value = tidy(field ? field[2] : line);
+    if (!value || /^(?:[-–—.]+|n\/?a|sin valor|null)$/i.test(value)) return false;
+    if ((!field || norm(field[1]) === 'detalle') && norm(value) === norm(title)) return false;
+    return true;
+  }).join('\n').trim();
+}
+function careerLabel(value) { return tidy(value).replace(/^[A-Z0-9]+\s*-\s*/i, '') || 'Sin clasificación'; }
+function academicLabel(booking) {
+  return [booking.faculty, booking.career ? careerLabel(booking.career) : ''].filter(Boolean).join(' · ');
+}
 function parseBookings(text) {
   const rows = csv(text), head = rows.shift() || [];
   const cols = ['Area - Room','Brief Description','Start Time - End Time','Full Description'].map(x => head.indexOf(x));
   if (cols.slice(0, 3).some(x => x < 0)) throw Error('Planning no devolvió el reporte público esperado.');
+  const unitCol = head.findIndex(h => /^(unidad|unity|facultad)$/i.test(tidy(h)));
+  let careerCol = head.findIndex(h => /^(ceco|carrera|programa)$/i.test(tidy(h)));
+  // En el CSV actual Ceco tiene encabezado vacío entre Unidad y Orden.
+  if (careerCol < 0 && unitCol >= 0 && tidy(head[unitCol + 1]) === '' && tidy(head[unitCol + 2]) === 'Orden') careerCol = unitCol + 1;
+  const orderCol = head.indexOf('Orden');
   return rows.map(r => {
     const times = (r[cols[2]] || '').split(' - ');
     if (times.length !== 2) throw Error('Intervalo de reserva desconocido.');
-    const start = stamp(times[0]), end = stamp(times[1]);
+    const start = stamp(times[0]), end = stamp(times[1]), title = r[cols[1]] || '(sin nombre)';
     if (end <= start) throw Error('Reserva con intervalo inválido.');
-    return {room: tidy(r[cols[0]]), title: r[cols[1]] || '(sin nombre)', start, end, description: cols[3] < 0 ? '' : r[cols[3]]};
+    return {
+      room: tidy(r[cols[0]]), title, start, end,
+      description: meaningfulDescription(cols[3] < 0 ? '' : r[cols[3]], title),
+      faculty: unitCol < 0 ? '' : tidy(r[unitCol]),
+      career: careerCol < 0 ? '' : tidy(r[careerCol]),
+      order: orderCol < 0 ? '' : tidy(r[orderCol])
+    };
   });
+}
+function selectedDayBookings() {
+  if (!data) return [];
+  const start = Date.parse(data.date + 'T00:00:00-03:00');
+  return data.bookings.filter(b => overlaps(b, start, start + 86400000));
+}
+function resetOptions(select, values, emptyLabel, label = value => value) {
+  const previous = select.value;
+  select.replaceChildren();
+  const all = document.createElement('option'); all.value = ''; all.textContent = emptyLabel; select.append(all);
+  for (const value of values) {
+    const option = document.createElement('option'); option.value = value || '__unclassified__'; option.textContent = value ? label(value) : 'Sin clasificación'; select.append(option);
+  }
+  select.value = [...select.children].some(o => o.value === previous) ? previous : '';
+}
+function classificationMatches(actual, selected) { return !selected || (selected === '__unclassified__' ? !actual : actual === selected); }
+function updateAcademicFilters() {
+  const bookings = selectedDayBookings();
+  const units = [...new Set(bookings.map(b => b.faculty || ''))].sort((a, b) => a.localeCompare(b, 'es'));
+  resetOptions($('faculty'), units, 'Todas');
+  const careers = [...new Set(bookings.filter(b => classificationMatches(b.faculty, $('faculty').value)).map(b => b.career || ''))].sort((a, b) => careerLabel(a).localeCompare(careerLabel(b), 'es'));
+  resetOptions($('career'), careers, 'Todas', careerLabel);
+}
+function subjectMatches(booking) {
+  return classificationMatches(booking.faculty, $('faculty').value) && classificationMatches(booking.career, $('career').value);
 }
 async function read(path, signal) {
   const controller = new AbortController(), cancel = () => controller.abort();
@@ -268,6 +320,7 @@ function card(title, tag, lines, url, description) {
   const h = document.createElement('h3'); h.textContent = title; el.append(h);
   for (const line of lines) {const p = document.createElement('p'); p.textContent = line; el.append(p);}
   if (url) {const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Ver en Planning ↗'; el.append(a);}
+  description = meaningfulDescription(description, title);
   if (description) {const d = document.createElement('details'), s = document.createElement('summary'); s.textContent = 'Detalle de la reserva'; d.append(s, document.createTextNode(description)); el.append(d);}
   return el;
 }
@@ -318,14 +371,14 @@ function render() {
   }
   if (mode === 'subjects') {
     const start = Date.parse(data.date + 'T00:00:00-03:00'), end = start + 86400000;
-    const found = data.bookings.filter(b => overlaps(b, start, end)).map(b => ({...b, score: score(b.title, $('q').value)}))
+    const found = data.bookings.filter(b => overlaps(b, start, end) && subjectMatches(b)).map(b => ({...b, score: score(b.title, $('q').value)}))
       .filter(b => Number.isFinite(b.score)).sort((a, b) => a.score - b.score || a.start - b.start);
     $('count').textContent = `${found.length} reservas encontradas`;
     for (const b of found) {
       const room = data.rooms.find(r => norm(r.full) === norm(b.room));
       const dates = relativeDate(0, new Date(b.start)) !== relativeDate(0, new Date(b.end));
       const tag = dates ? `${relativeDate(0, new Date(b.start))} ${clock(b.start)} — ${relativeDate(0, new Date(b.end))} ${clock(b.end)}` : `${clock(b.start)} — ${clock(b.end)}`;
-      $('results').append(card(b.title, tag, [b.room], room ? link(room) : null, b.description));
+      $('results').append(card(b.title, tag, [b.room, academicLabel(b)].filter(Boolean), room ? link(room) : null, b.description));
     }
   } else if (mode === 'roomSchedule') {
     const query = $('roomQuery').value.trim();
@@ -346,9 +399,12 @@ function render() {
         const time = document.createElement('span'); time.className = 'badge'; time.textContent = bookingLabel(booking);
         const title = document.createElement('h4'); title.textContent = booking.title;
         item.append(time, title);
-        if (booking.description) {
+        const label = academicLabel(booking);
+        if (label) { const p = document.createElement('p'); p.className = 'academic-label'; p.textContent = label; item.append(p); }
+        const description = meaningfulDescription(booking.description, booking.title);
+        if (description) {
           const details = document.createElement('details'), summary = document.createElement('summary');
-          summary.textContent = 'Detalle'; details.append(summary, document.createTextNode(booking.description)); item.append(details);
+          summary.textContent = 'Detalle'; details.append(summary, document.createTextNode(description)); item.append(details);
         }
         el.append(item);
       }
@@ -421,7 +477,7 @@ async function load() {
       }));
     }
     if (version !== loadVersion || signal.aborted) return;
-    data = {bookings, rooms, date, key}; pendingKey = ''; lastLoadedAt = Date.now();
+    data = {bookings, rooms, date, key}; pendingKey = ''; lastLoadedAt = Date.now(); updateAcademicFilters();
     $('status').className = partial.length ? 'error' : '';
     $('status').textContent = `Sync ${clock(lastLoadedAt)}${partial.length ? ' · Inventario incompleto: ' + partial.join(', ') : ''}`;
     render(); scheduleRefresh(partial.length ? 30000 : 300000);
@@ -442,6 +498,8 @@ $('to').addEventListener('input', () => {
   $('hours').value = Number.isFinite(delta) ? String(Math.round(delta / 60 * 1000000) / 1000000) : '';
   updateRange();
 });
+$('faculty').addEventListener('change', () => { $('career').value = ''; updateAcademicFilters(); render(); });
+$('career').addEventListener('change', render);
 for (const id of ['q', 'roomQuery', 'building']) $(id).addEventListener('input', render);
 const tabs = ['subjects', 'rooms', 'roomSchedule'];
 function selectTab(tab) {
