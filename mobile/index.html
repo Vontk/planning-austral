@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e1e1e">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>campus lookup</title><link id="favicon" rel="icon" href="/logo.svg">
+<style>/* MOBILE_STYLE */</style>
+</head>
+<body>
+<header><div><h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>campus lookup</h1><p class="eyebrow">Tu próxima aula, a mano.</p></div><button id="theme" type="button">Tema claro</button></header>
+<main>
+<section class="context" aria-label="Fecha y campus">
+<label>Campus<select id="campus"><option>Pilar</option><option value="Bs. As.">Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label>
+<div class="date-field"><label for="date">Fecha</label><input id="date" type="date" required aria-describedby="timezone"><div class="date-shortcuts"><button id="today" type="button">Hoy</button><button id="tomorrow" type="button">Mañana</button></div></div>
+</section>
+<div class="sync"><div id="status" role="status" aria-live="polite">Conectando con Planning…</div><button id="refresh" type="button">Actualizar</button></div>
+<section class="search-panel">
+<div id="subjectForm" role="tabpanel" aria-labelledby="subjects">
+<h2>¿Dónde tenés clase?</h2><p class="intro">Buscá una materia para encontrar su aula.</p>
+<label for="q">Materia</label><div class="search-wrap"><input id="q" type="search" placeholder="Ej. Análisis II" autocomplete="off" enterkeyhint="search"><button id="clearSubject" class="clear" type="button" aria-label="Borrar materia" hidden>×</button></div>
+<details id="filters" class="filters"><summary>Filtrar por facultad y carrera <span id="filterCount"></span></summary>
+<div class="filter-content"><div class="academic-filter"><label for="facultySearch">Facultad / unidad</label><div class="academic-picker"><input id="facultySearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="facultyOptions" autocomplete="off" value="Todas"><span class="picker-arrow" aria-hidden="true">⌄</span><div id="facultyOptions" class="picker-options" role="listbox" aria-label="Opciones de facultad" hidden></div></div><select id="faculty" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div>
+<div class="academic-filter"><label for="careerSearch">Carrera / programa</label><div class="academic-picker"><input id="careerSearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="careerOptions" autocomplete="off" value="Todas"><span class="picker-arrow" aria-hidden="true">⌄</span><div id="careerOptions" class="picker-options" role="listbox" aria-label="Opciones de carrera" hidden></div></div><select id="career" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div><button id="resetFilters" type="button">Limpiar filtros</button></div>
+</details><p class="hint">Podés escribir sin tildes: “analisis 2” encuentra “Análisis II”.</p>
+</div>
+<div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden>
+<h2>Un lugar para estudiar</h2><p class="intro">Elegí cuándo necesitás un aula libre.</p>
+<div class="time-heading"><span class="hint">Horario que necesitás</span><button id="now" type="button">Desde ahora</button></div>
+<div class="time-grid"><div><label for="from">Desde</label><input id="from" type="time" value="12:00" required></div><div><label for="to">Hasta</label><input id="to" type="time" value="14:00" required></div></div>
+<div class="duration-heading"><label for="hours">Duración (horas)</label><input id="hours" type="text" inputmode="decimal" value="2" autocomplete="off" aria-describedby="intervalHint"></div>
+<div class="duration-chips" aria-label="Duración rápida"><button type="button" data-hours="0.5">30 min</button><button type="button" data-hours="1">1 hora</button><button type="button" data-hours="2">2 horas</button><button type="button" data-hours="3">3 horas</button></div>
+<p id="intervalHint" class="hint" role="status"></p>
+<label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label>
+<p class="notice">Libre = sin reservas registradas. La ocupación real puede variar.</p><button id="seeRooms" class="primary" type="button">Ver aulas libres ↓</button>
+</div>
+<div id="scheduleForm" role="tabpanel" aria-labelledby="roomSchedule" hidden>
+<h2>El día de tu aula</h2><p class="intro">Consultá sus reservas, en orden de horario.</p><label for="roomQuery">Aula o edificio</label><div class="search-wrap"><input id="roomQuery" type="search" placeholder="Ej. R2, C8.1 o Ceibo" autocomplete="off" enterkeyhint="search"><button id="clearRoom" class="clear" type="button" aria-label="Borrar aula" hidden>×</button></div>
+<p class="hint">La fecha y el campus de arriba se aplican a esta búsqueda.</p>
+</div>
+</section>
+<div class="results-heading"><h2 id="count">Cargando horarios…</h2><button id="top" type="button" hidden>Subir ↑</button></div>
+<div id="loading" class="loading-state" role="status" hidden><span class="loader" aria-hidden="true"></span><p>Consultando Planning…<br><small>La primera carga puede tardar unos segundos.</small></p></div>
+<div id="errorState" class="empty-state" hidden><h3>No pudimos cargar los horarios</h3><p>Revisá tu conexión a internet y volvé a intentar.</p><button id="retry" class="primary" type="button">Reintentar</button></div>
+<div id="results" aria-live="polite" aria-busy="true"></div><button id="more" class="more" type="button" hidden>Mostrar más resultados</button>
+<footer><a href="https://planning-campus.austral.edu.ar:44443/" rel="noopener" target="_blank">Abrir Planning Austral ↗</a><p id="timezone">Horarios de Argentina · UTC−3<br>Consulta pública · Sin iniciar sesión</p></footer>
+</main>
+<nav class="tabs" role="tablist" aria-label="Qué querés buscar">
+<button id="subjects" type="button" role="tab" aria-controls="subjectForm" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h7l2 2 2-2h7v15h-7l-2 2-2-2H3zM12 6v15"/></svg><span>Materias</span></button>
+<button id="rooms" type="button" role="tab" aria-controls="roomForm" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V3h14v18M3 21h18M9 7h6M9 11h6M14 16h1"/></svg><span>Aulas libres</span></button>
+<button id="roomSchedule" type="button" role="tab" aria-controls="scheduleForm" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v16H4zM8 3v4M16 3v4M4 10h16M8 14h2M14 14h2M8 17h2"/></svg><span>Por aula</span></button>
+</nav>
+<script>/* PLANNING_SCRIPT */</script>
+<script>/* MOBILE_SCRIPT */</script>
+</body></html>

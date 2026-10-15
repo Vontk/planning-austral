@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e1e1e">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'">
+<title>campus lookup</title><link id="favicon" rel="icon" href="/logo.svg">
+<style>:root{color-scheme:dark;font-family:Consolas,"Liberation Mono",monospace;font-size:14px;--background:#1e1e1e;--text:#dedede;--surface:#252526;--input:#303031;--line:#484849;--muted:#b0b0b0;--blue:#9cdcfe;--purple:#c5a5d8;--green:#b5cea8;--orange:#cead96;--secondary:#c7c7c7;background:var(--background);color:var(--text)}
+html[data-theme=light]{color-scheme:light;--background:#f5f5f5;--text:#282828;--surface:#ebebed;--input:#fff;--line:#b8b8bc;--muted:#59595c;--blue:#1a6088;--purple:#70428d;--green:#3d642a;--orange:#874723;--secondary:#444}
+*{box-sizing:border-box}body{margin:0}button,input,select{font:inherit;color:var(--text);border:1px solid var(--line);border-radius:8px;background:var(--input);min-height:48px}button{cursor:pointer;padding:10px 14px;touch-action:manipulation}input,select{padding:12px;width:100%;min-width:0;font-size:16px}button:active{filter:brightness(1.2)}button:disabled{opacity:.55;cursor:wait}input::placeholder{color:var(--muted);opacity:1}button:focus-visible,input:focus,select:focus,summary:focus-visible,a:focus-visible{outline:2px solid var(--blue);outline-offset:3px}button[aria-pressed=true]{border-color:var(--blue);color:var(--blue);background:var(--surface)}[hidden]{display:none!important}
+header,main{max-width:720px;margin:auto;padding:0 20px}header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-top:24px;padding-bottom:22px;border-bottom:1px solid var(--line)}h1{display:flex;align-items:center;gap:9px;font-size:20px;font-weight:400;letter-spacing:-.7px;margin:0;color:var(--blue);white-space:nowrap}h1 svg{width:24px;height:24px}.eyebrow{font-size:11px;line-height:1.5;margin:8px 0 0;color:var(--muted)}#theme{font-size:11px;padding:8px;max-width:82px;background:transparent}main{padding-top:20px;padding-bottom:110px}label{display:block;font-size:12px;color:var(--blue);margin-bottom:8px;line-height:1.5}.context{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr);gap:14px}.context>label{margin:0}.context select{margin-top:8px}.date-shortcuts{display:flex;gap:6px;margin-top:8px}.date-shortcuts button{flex:1;min-width:0;font-size:12px;min-height:44px;background:transparent;padding:8px}.date-shortcuts button[aria-pressed=true]{color:var(--blue);border-color:var(--blue)}.sync{display:flex;align-items:center;gap:10px;margin:14px 0 24px;min-height:44px}#status{color:var(--muted);font-size:11px;line-height:1.7;overflow-wrap:anywhere;flex:1}#status:before{content:'● ';color:var(--green)}#status.loading:before{color:var(--blue)}#status.error,#status.error:before{color:var(--orange)}#refresh{flex-shrink:0;background:transparent;font-size:11px;min-height:44px;padding:8px 10px}.search-panel h2{font-size:21px;line-height:1.4;font-weight:400;letter-spacing:-.6px;margin:0 0 7px}.intro{color:var(--muted);font-size:12px;line-height:1.7;margin:0 0 22px}.search-wrap{position:relative}.search-wrap input{padding-right:52px;min-height:54px;background:var(--surface)}.clear{position:absolute;right:4px;top:4px;border:0;min-height:46px;width:44px;font-size:24px;background:transparent}input[type=search]::-webkit-search-cancel-button{display:none}.hint{font-size:11px;color:var(--muted);line-height:1.8}.filters{margin-top:16px;border:1px solid var(--line);border-radius:8px}.filters>summary{white-space:normal;font-size:12px;min-height:48px;padding:15px 12px;color:var(--purple);cursor:pointer;line-height:1.6}.filter-content{padding:0 12px 12px}.academic-filter{margin-bottom:16px}.academic-picker{position:relative}.academic-picker input{padding-right:30px}.picker-arrow{position:absolute;right:12px;top:13px;pointer-events:none}.picker-options{position:absolute;z-index:20;width:100%;max-height:264px;overflow:auto;background:var(--input);border:1px solid var(--line);box-shadow:0 8px 20px #0005;border-radius:8px}.picker-options button{display:block;width:100%;text-align:left;border:0;border-radius:0;line-height:1.6;white-space:normal}.picker-options button.active,.picker-options button:hover{background:var(--surface);color:var(--blue)}.picker-empty{padding:16px;color:var(--muted)}#resetFilters{font-size:12px;background:transparent;width:100%}.time-heading,.duration-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.time-heading label,.duration-heading label{margin:0}.time-heading{margin-bottom:8px}.time-heading button{min-height:44px;color:var(--blue);background:transparent}.duration-heading{margin:20px 0 8px}.duration-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:10px 0 20px}.duration-chips button{padding:8px 3px;font-size:12px;min-height:44px;background:transparent}#intervalHint{color:var(--orange)}#building{margin-bottom:8px}.notice{font-size:11px;color:var(--orange);border-left:2px solid var(--orange);padding:4px 0 4px 12px;line-height:1.8;margin:16px 0}.results-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:24px 0 12px;scroll-margin-top:16px}#count{font-size:12px;line-height:1.8;color:var(--muted);font-weight:400;margin:0}#top{font-size:11px;background:transparent;white-space:nowrap}.card{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:18px;margin-bottom:12px;overflow-wrap:anywhere}.card h3{font-size:16px;line-height:1.55;color:var(--blue);font-weight:400;margin:8px 0 12px}.badge{font-size:13px;color:var(--green);line-height:1.6}.card p{font-size:12px;color:var(--secondary);line-height:1.8;margin:8px 0}.card p.academic-label{font-size:11px;color:var(--purple)}.card a,footer a{display:inline-flex;align-items:center;min-height:44px;color:var(--purple);font-size:12px;text-underline-offset:4px}.card details{font-size:12px;line-height:1.9;white-space:pre-wrap;color:var(--muted);margin-top:6px}.card summary{min-height:44px;padding:10px 0;color:var(--orange);cursor:pointer}.schedule-booking{border-top:1px solid var(--line);padding-top:16px;margin-top:12px}.schedule-booking h4{font-size:13px;font-weight:400;line-height:1.7;margin:6px 0}.schedule-action{display:block;width:100%;text-align:left;color:var(--blue);background:transparent;margin-top:10px;font-size:12px}.empty,.empty-state{padding:24px 18px;border:1px dashed var(--line);border-radius:10px;line-height:1.8;color:var(--muted);font-size:13px}.empty-state h3{font-weight:400;color:var(--orange);font-size:16px;margin-top:0}.primary{color:var(--background);background:var(--blue);border-color:var(--blue);width:100%;margin-top:10px}.loading-state{display:flex;gap:16px;align-items:center;padding:24px 0;color:var(--muted);font-size:12px;line-height:1.8}.loading-state small{font-size:11px}.loader{display:block;width:24px;height:24px;flex-shrink:0;border:2px solid var(--line);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.more{width:100%;color:var(--blue);background:transparent;margin-top:4px}footer{border-top:1px solid var(--line);margin-top:28px;padding-top:12px}footer p{font-size:11px;color:var(--muted);line-height:1.8}.tabs{position:fixed;z-index:30;bottom:0;left:0;right:0;display:flex;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;min-height:76px;background:transparent;border:0;border-top:2px solid transparent;border-radius:0;color:var(--muted);font-size:12px;padding:10px 4px}.tabs button[aria-selected=true]{color:var(--blue);border-top-color:var(--purple);background:var(--background)}.tabs svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}@media(min-width:600px){header,main{padding-left:28px;padding-right:28px}.context{grid-template-columns:1fr 1fr}.tabs{max-width:720px;margin:auto;border-left:1px solid var(--line);border-right:1px solid var(--line)}#results{display:grid;grid-template-columns:1fr 1fr;gap:12px}.card{margin:0}#results>.empty{grid-column:1/-1}}@media(max-width:350px){header,main{padding-left:14px;padding-right:14px}h1{font-size:17px}.context{grid-template-columns:1fr}.date-shortcuts{max-width:100%}}@media(prefers-reduced-motion:reduce){.loader{animation:none}}
+
+.time-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.duration-heading input{width:80px;min-height:44px;text-align:center}.duration-heading{margin-top:14px}.duration-chips{margin-bottom:12px}.time-heading{margin-top:-8px}.search-panel{scroll-margin-top:16px}.context input[type=date]{min-width:0}#seeRooms{margin:0}.duration-heading .hint{display:none}
+</style>
+</head>
+<body>
+<header><div><h1><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>campus lookup</h1><p class="eyebrow">Tu próxima aula, a mano.</p></div><button id="theme" type="button">Tema claro</button></header>
+<main>
+<section class="context" aria-label="Fecha y campus">
+<label>Campus<select id="campus"><option>Pilar</option><option value="Bs. As.">Buenos Aires</option><option>Rosario</option><option value="">Todos</option></select></label>
+<div class="date-field"><label for="date">Fecha</label><input id="date" type="date" required aria-describedby="timezone"><div class="date-shortcuts"><button id="today" type="button">Hoy</button><button id="tomorrow" type="button">Mañana</button></div></div>
+</section>
+<div class="sync"><div id="status" role="status" aria-live="polite">Conectando con Planning…</div><button id="refresh" type="button">Actualizar</button></div>
+<section class="search-panel">
+<div id="subjectForm" role="tabpanel" aria-labelledby="subjects">
+<h2>¿Dónde tenés clase?</h2><p class="intro">Buscá una materia para encontrar su aula.</p>
+<label for="q">Materia</label><div class="search-wrap"><input id="q" type="search" placeholder="Ej. Análisis II" autocomplete="off" enterkeyhint="search"><button id="clearSubject" class="clear" type="button" aria-label="Borrar materia" hidden>×</button></div>
+<details id="filters" class="filters"><summary>Filtrar por facultad y carrera <span id="filterCount"></span></summary>
+<div class="filter-content"><div class="academic-filter"><label for="facultySearch">Facultad / unidad</label><div class="academic-picker"><input id="facultySearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="facultyOptions" autocomplete="off" value="Todas"><span class="picker-arrow" aria-hidden="true">⌄</span><div id="facultyOptions" class="picker-options" role="listbox" aria-label="Opciones de facultad" hidden></div></div><select id="faculty" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div>
+<div class="academic-filter"><label for="careerSearch">Carrera / programa</label><div class="academic-picker"><input id="careerSearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="careerOptions" autocomplete="off" value="Todas"><span class="picker-arrow" aria-hidden="true">⌄</span><div id="careerOptions" class="picker-options" role="listbox" aria-label="Opciones de carrera" hidden></div></div><select id="career" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div><button id="resetFilters" type="button">Limpiar filtros</button></div>
+</details><p class="hint">Podés escribir sin tildes: “analisis 2” encuentra “Análisis II”.</p>
+</div>
+<div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden>
+<h2>Un lugar para estudiar</h2><p class="intro">Elegí cuándo necesitás un aula libre.</p>
+<div class="time-heading"><span class="hint">Horario que necesitás</span><button id="now" type="button">Desde ahora</button></div>
+<div class="time-grid"><div><label for="from">Desde</label><input id="from" type="time" value="12:00" required></div><div><label for="to">Hasta</label><input id="to" type="time" value="14:00" required></div></div>
+<div class="duration-heading"><label for="hours">Duración (horas)</label><input id="hours" type="text" inputmode="decimal" value="2" autocomplete="off" aria-describedby="intervalHint"></div>
+<div class="duration-chips" aria-label="Duración rápida"><button type="button" data-hours="0.5">30 min</button><button type="button" data-hours="1">1 hora</button><button type="button" data-hours="2">2 horas</button><button type="button" data-hours="3">3 horas</button></div>
+<p id="intervalHint" class="hint" role="status"></p>
+<label>Edificio<select id="building"><option value="default">Olivo A/B · Roble · Ceibo</option><option value="all">Todas las aulas</option></select></label>
+<p class="notice">Libre = sin reservas registradas. La ocupación real puede variar.</p><button id="seeRooms" class="primary" type="button">Ver aulas libres ↓</button>
+</div>
+<div id="scheduleForm" role="tabpanel" aria-labelledby="roomSchedule" hidden>
+<h2>El día de tu aula</h2><p class="intro">Consultá sus reservas, en orden de horario.</p><label for="roomQuery">Aula o edificio</label><div class="search-wrap"><input id="roomQuery" type="search" placeholder="Ej. R2, C8.1 o Ceibo" autocomplete="off" enterkeyhint="search"><button id="clearRoom" class="clear" type="button" aria-label="Borrar aula" hidden>×</button></div>
+<p class="hint">La fecha y el campus de arriba se aplican a esta búsqueda.</p>
+</div>
+</section>
+<div class="results-heading"><h2 id="count">Cargando horarios…</h2><button id="top" type="button" hidden>Subir ↑</button></div>
+<div id="loading" class="loading-state" role="status" hidden><span class="loader" aria-hidden="true"></span><p>Consultando Planning…<br><small>La primera carga puede tardar unos segundos.</small></p></div>
+<div id="errorState" class="empty-state" hidden><h3>No pudimos cargar los horarios</h3><p>Revisá tu conexión a internet y volvé a intentar.</p><button id="retry" class="primary" type="button">Reintentar</button></div>
+<div id="results" aria-live="polite" aria-busy="true"></div><button id="more" class="more" type="button" hidden>Mostrar más resultados</button>
+<footer><a href="https://planning-campus.austral.edu.ar:44443/" rel="noopener" target="_blank">Abrir Planning Austral ↗</a><p id="timezone">Horarios de Argentina · UTC−3<br>Consulta pública · Sin iniciar sesión</p></footer>
+</main>
+<nav class="tabs" role="tablist" aria-label="Qué querés buscar">
+<button id="subjects" type="button" role="tab" aria-controls="subjectForm" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h7l2 2 2-2h7v15h-7l-2 2-2-2H3zM12 6v15"/></svg><span>Materias</span></button>
+<button id="rooms" type="button" role="tab" aria-controls="roomForm" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V3h14v18M3 21h18M9 7h6M9 11h6M14 16h1"/></svg><span>Aulas libres</span></button>
+<button id="roomSchedule" type="button" role="tab" aria-controls="scheduleForm" aria-selected="false" tabindex="-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v16H4zM8 3v4M16 3v4M4 10h16M8 14h2M14 14h2M8 17h2"/></svg><span>Por aula</span></button>
+</nav>
+<script>
+const BASE = 'https://planning-campus.austral.edu.ar:44443/';
+const SESSION = '__PLANNING_SESSION__';
+const $ = id => document.getElementById(id);
+let data = null, mode = 'subjects', loadVersion = 0, loadController = null;
+let refreshTimer, lastLoadedAt = 0, sessionStream, pendingKey = '', failedKey = '';
+const tz = 'America/Argentina/Buenos_Aires';
+function relativeDate(days = 0, now = new Date()) {
+  const parts = new Intl.DateTimeFormat('en-CA', {timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit'}).formatToParts(now);
+  const p = Object.fromEntries(parts.map(x => [x.type, x.value]));
+  return new Date(Date.UTC(+p.year, +p.month - 1, +p.day + days)).toISOString().slice(0, 10);
+}
+function addDays(date, days) {
+  const d = new Date(date + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+const clock = t => new Intl.DateTimeFormat('es-AR', {timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23'}).format(t);
+function minutes(time) {
+  if (!/^\d{2}:\d{2}$/.test(time)) return NaN;
+  const [h, m] = time.split(':').map(Number);
+  return h < 24 && m < 60 ? h * 60 + m : NaN;
+}
+const timeText = m => `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+function interval(date, from, hours) {
+  const startMinute = minutes(from), raw = String(hours).trim().replace(',', '.');
+  const duration = /^(?:\d+(?:\.\d*)?|\.\d+)$/.test(raw) ? Number(raw) : NaN;
+  const delta = Math.round(duration * 60);
+  if (!date || !Number.isFinite(startMinute) || !Number.isFinite(duration) || duration <= 0 || duration > 24 || delta < 1) return null;
+  const total = startMinute + delta, dayOffset = Math.floor(total / 1440);
+  const endDate = addDays(date, dayOffset), to = timeText(total);
+  const start = Date.parse(`${date}T${from}:00-03:00`), end = start + delta * 60000;
+  return {start, end, to, endDate, dayOffset, minutes: delta};
+}
+function currentInterval() { return interval($('date').value, $('from').value, $('hours').value); }
+function scope() {
+  const date = $('date').value, campus = $('campus').value, range = currentInterval();
+  // An interval ending at exactly midnight needs no bookings from the following day.
+  const endDate = range ? relativeDate(0, new Date(range.end - 1)) : date;
+  return {date, campus, endDate, key: [date, campus, endDate].join('|')};
+}
+function syncEnd() {
+  const range = currentInterval();
+  $('hours').setAttribute('aria-invalid', String(!range));
+  $('intervalHint').textContent = range ? (range.dayOffset ? `El intervalo termina el ${range.endDate} (día siguiente).` : '') : 'Ingresá una duración de al menos 1 minuto y hasta 24 horas (ej. 1,5).';
+  if (range) $('to').value = range.to;
+}
+function updateRange() { syncEnd(); ensureScope(); }
+function ensureScope() {
+  const wanted = scope();
+  if (!wanted.date || (!data || data.key !== wanted.key) && pendingKey !== wanted.key) load();
+  else render();
+}
+function setTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  $('theme').textContent = theme === 'dark' ? 'Tema claro' : 'Tema oscuro';
+  $('theme').setAttribute('aria-label', `Cambiar a tema ${theme === 'dark' ? 'claro' : 'oscuro'}`);
+  const color = theme === 'dark' ? '#9cdcfe' : '#246b93';
+  $('favicon').href = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round"><circle cx="10" cy="10" r="6.5"/><path d="m15 15 6 6"/></svg>`);
+  try { localStorage.setItem('campus-theme', theme); } catch {}
+}
+let savedTheme = 'dark';
+try { if (localStorage.getItem('campus-theme') === 'light') savedTheme = 'light'; } catch {}
+setTheme(savedTheme);
+$('theme').onclick = () => setTheme(document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark');
+$('date').value = relativeDate();
+const tidy = s => String(s ?? '').replace(/\s+/g, ' ').trim();
+const norm = s => String(s ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  .replace(/\b(x|ix|viii|vii|vi|v|iv|iii|ii|i)\b/g, v => ({i:1,ii:2,iii:3,iv:4,v:5,vi:6,vii:7,viii:8,ix:9,x:10}[v]))
+  .replace(/[^a-z0-9]+/g, ' ').trim();
+function distance(a, b) {
+  let v = Array.from({length: b.length + 1}, (_, i) => i);
+  for (let i = 0; i < a.length; i++) {
+    const n = [i + 1];
+    for (let j = 0; j < b.length; j++) n[j + 1] = Math.min(n[j] + 1, v[j + 1] + 1, v[j] + (a[i] !== b[j]));
+    v = n;
+  }
+  return v[b.length];
+}
+function score(title, query) {
+  const words = norm(title).split(' '), terms = norm(query).split(' ').filter(Boolean);
+  const commission = words.findIndex((w, i) => i > 0 && /^(com|comision|grupo|cohorte)$/.test(w));
+  const explicitCommission = terms.some(w => /^(com|comision|grupo|cohorte)$/.test(w));
+  let total = 0;
+  for (const term of terms) {
+    const numeric = /^\d+$/.test(term);
+    const candidates = numeric && commission >= 0 && !explicitCommission ? words.slice(0, commission) : words;
+    let best = Infinity;
+    for (const word of candidates) {
+      const value = term === word ? 0 : (!numeric && word.startsWith(term) ? 0.2 : (!numeric && term.length >= 4 ? distance(term, word) : Infinity));
+      if (value <= Math.max(1, Math.floor(term.length * .22))) best = Math.min(best, value);
+    }
+    if (!Number.isFinite(best)) return Infinity;
+    total += best;
+  }
+  return total;
+}
+function csv(text) {
+  const rows = []; let row = [], value = '', quoted = false;
+  text = text.replace(/^\uFEFF/, '');
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { if (quoted && text[i + 1] === '"') {value += '"'; i++;} else quoted = !quoted; }
+    else if (c === ',' && !quoted) { row.push(value); value = ''; }
+    else if ((c === '\n' || c === '\r') && !quoted) {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(value); if (row.some(Boolean)) rows.push(row); row = []; value = '';
+    } else value += c;
+  }
+  if (value || row.length) {row.push(value); rows.push(row);}
+  if (quoted) throw Error('CSV incompleto.');
+  return rows;
+}
+function stamp(text) {
+  const months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+  const m = text.match(/(\d{1,2})\s+(\w+)\s+(\d{4})\s+(\d{2}:\d{2}(?::\d{2})?)/);
+  if (!m || months.indexOf(m[2].toLowerCase()) < 0) throw Error('Formato de fecha desconocido.');
+  const date = `${m[3]}-${String(months.indexOf(m[2].toLowerCase()) + 1).padStart(2, '0')}-${m[1].padStart(2, '0')}`;
+  const time = m[4].length === 5 ? m[4] + ':00' : m[4];
+  const t = Date.parse(`${date}T${time}-03:00`);
+  if (!Number.isFinite(t) || relativeDate(0, new Date(t)) !== date) throw Error('Fecha de reserva inválida.');
+  return t;
+}
+function meaningfulDescription(text, title = '') {
+  return String(text ?? '').split(/\r?\n/).filter(line => {
+    if (!line.trim()) return false;
+    const field = line.match(/^\s*([^:]+):\s*(.*)$/);
+    const value = tidy(field ? field[2] : line);
+    if (!value || /^(?:[-–—.]+|n\/?a|sin valor|null)$/i.test(value)) return false;
+    if ((!field || norm(field[1]) === 'detalle') && norm(value) === norm(title)) return false;
+    return true;
+  }).join('\n').trim();
+}
+function careerLabel(value) { return tidy(value).replace(/^[A-Z0-9]+\s*-\s*/i, '') || 'Sin clasificación'; }
+function academicLabel(booking) {
+  return [booking.faculty, booking.career ? careerLabel(booking.career) : ''].filter(Boolean).join(' · ');
+}
+function parseBookings(text) {
+  const rows = csv(text), head = rows.shift() || [];
+  const cols = ['Area - Room','Brief Description','Start Time - End Time','Full Description'].map(x => head.indexOf(x));
+  if (cols.slice(0, 3).some(x => x < 0)) throw Error('Planning no devolvió el reporte público esperado.');
+  const unitCol = head.findIndex(h => /^(unidad|unity|facultad)$/i.test(tidy(h)));
+  let careerCol = head.findIndex(h => /^(ceco|carrera|programa)$/i.test(tidy(h)));
+  // En el CSV actual Ceco tiene encabezado vacío entre Unidad y Orden.
+  if (careerCol < 0 && unitCol >= 0 && tidy(head[unitCol + 1]) === '' && tidy(head[unitCol + 2]) === 'Orden') careerCol = unitCol + 1;
+  const orderCol = head.indexOf('Orden');
+  return rows.map(r => {
+    const times = (r[cols[2]] || '').split(' - ');
+    if (times.length !== 2) throw Error('Intervalo de reserva desconocido.');
+    const start = stamp(times[0]), end = stamp(times[1]), title = r[cols[1]] || '(sin nombre)';
+    if (end <= start) throw Error('Reserva con intervalo inválido.');
+    return {
+      room: tidy(r[cols[0]]), title, start, end,
+      description: meaningfulDescription(cols[3] < 0 ? '' : r[cols[3]], title),
+      faculty: unitCol < 0 ? '' : tidy(r[unitCol]),
+      career: careerCol < 0 ? '' : tidy(r[careerCol]),
+      order: orderCol < 0 ? '' : tidy(r[orderCol])
+    };
+  });
+}
+function selectedDayBookings() {
+  if (!data) return [];
+  const start = Date.parse(data.date + 'T00:00:00-03:00');
+  return data.bookings.filter(b => overlaps(b, start, start + 86400000));
+}
+function resetOptions(select, values, emptyLabel, label = value => value) {
+  const previous = select.value;
+  select.replaceChildren();
+  const all = document.createElement('option'); all.value = ''; all.textContent = emptyLabel; select.append(all);
+  for (const value of values) {
+    const option = document.createElement('option'); option.value = value || '__unclassified__'; option.textContent = value ? label(value) : 'Sin clasificación'; select.append(option);
+  }
+  select.value = [...select.children].some(o => o.value === previous) ? previous : '';
+}
+function classificationMatches(actual, selected) { return !selected || (selected === '__unclassified__' ? !actual : actual === selected); }
+function updateAcademicFilters() {
+  const bookings = selectedDayBookings();
+  const units = [...new Set(bookings.map(b => b.faculty || ''))].sort((a, b) => a.localeCompare(b, 'es'));
+  resetOptions($('faculty'), units, 'Todas');
+  const careers = [...new Set(bookings.filter(b => classificationMatches(b.faculty, $('faculty').value)).map(b => b.career || ''))].sort((a, b) => careerLabel(a).localeCompare(careerLabel(b), 'es'));
+  resetOptions($('career'), careers, 'Todas', careerLabel);
+  for (const id of ['faculty', 'career']) refreshPicker(id);
+}
+function subjectMatches(booking) {
+  return classificationMatches(booking.faculty, $('faculty').value) && classificationMatches(booking.career, $('career').value);
+}
+async function read(path, signal) {
+  const controller = new AbortController(), cancel = () => controller.abort();
+  signal.addEventListener('abort', cancel, {once: true});
+  if (signal.aborted) controller.abort();
+  const timeout = setTimeout(cancel, 45000);
+  try {
+    const response = await fetch('/api/planning?path=' + encodeURIComponent(path), {credentials: 'omit', headers: {'X-Planning-Session': SESSION}, cache: 'no-store', signal: controller.signal});
+    if (!response.ok) throw Error('Planning respondió ' + response.status);
+    return await response.text();
+  } finally { clearTimeout(timeout); signal.removeEventListener('abort', cancel); }
+}
+const doc = text => new DOMParser().parseFromString(text, 'text/html');
+function dateParams(date = $('date').value) {
+  const [year, month, day] = date.split('-');
+  return new URLSearchParams({year, month, day});
+}
+function link(room) { const p = dateParams(); p.set('area', room.area); p.set('room', room.id); return BASE + 'week.php?' + p; }
+function card(title, tag, lines, url, description) {
+  const el = document.createElement('article'); el.className = 'card';
+  if (tag) {const b = document.createElement('span'); b.className = 'badge'; b.textContent = tag; el.append(b);}
+  const h = document.createElement('h3'); h.textContent = title; el.append(h);
+  for (const line of lines) {const p = document.createElement('p'); p.textContent = line; el.append(p);}
+  if (url) {const a = document.createElement('a'); a.href = url; a.target = '_blank'; a.rel = 'noopener'; a.textContent = 'Ver en Planning ↗'; el.append(a);}
+  description = meaningfulDescription(description, title);
+  if (description) {const d = document.createElement('details'), s = document.createElement('summary'); s.textContent = 'Detalle de la reserva'; d.append(s, document.createTextNode(description)); el.append(d);}
+  return el;
+}
+function roomCode(room) {
+  const match = tidy(room.name).match(/^(?:aula\s+)?([abcr])\s*(\d+(?:[.,]\d+)?)\b/i);
+  return match ? match[1].toUpperCase() + match[2].replace(',', '.') : null;
+}
+function isPhysicalClassroom(room) {
+  return !/virtual|online|deportes|exterior/.test(norm(room.areaName))
+    && !/online|oficina|deposito/.test(norm(room.name))
+    && (/^aula\b/.test(norm(room.name)) || !!roomCode(room));
+}
+function bookingLabel(booking) {
+  const startDate = relativeDate(0, new Date(booking.start)), endDate = relativeDate(0, new Date(booking.end));
+  return startDate === endDate ? `${clock(booking.start)} — ${clock(booking.end)}` : `${startDate} ${clock(booking.start)} — ${endDate} ${clock(booking.end)}`;
+}
+function roomSearchScore(room, query) {
+  const code = roomCode(room), compact = query.trim().replace(/\s+/g, '').toUpperCase();
+  if (code && code.toUpperCase() === compact) return -1;
+  return score(room.full, query);
+}
+function overlaps(booking, start, end) { return booking.start < end && booking.end > start; }
+function availableRooms(rooms, bookings, range) {
+  const exact = new Map(rooms.map(r => [norm(r.full), r]));
+  const byRoom = new Map(), unmatched = [];
+  for (const booking of bookings) {
+    let room = exact.get(norm(booking.room));
+    if (!room) {
+      const candidates = rooms.filter(r => {
+        if (!norm(booking.room).startsWith(norm(r.areaName) + ' ')) return false;
+        const name = booking.room.slice(r.areaName.length).replace(/^\s*-\s*/, '');
+        return roomCode(r) && roomCode({name}) === roomCode(r);
+      });
+      if (candidates.length === 1) room = candidates[0];
+    }
+    if (!room) { if (overlaps(booking, range.start, range.end)) unmatched.push(booking); continue; }
+    const key = norm(room.full);
+    if (!byRoom.has(key)) byRoom.set(key, []);
+    byRoom.get(key).push(booking);
+  }
+  return {byRoom, unmatched};
+}
+function render() {
+  $('results').replaceChildren();
+  if (!data || data.key !== scope().key) {
+    $('count').textContent = !$('date').value ? 'Elegí una fecha' : failedKey === scope().key ? 'Sin datos confirmados' : 'Cargando horarios…';
+    return;
+  }
+  if (mode === 'subjects') {
+    const start = Date.parse(data.date + 'T00:00:00-03:00'), end = start + 86400000;
+    const found = data.bookings.filter(b => overlaps(b, start, end) && subjectMatches(b)).map(b => ({...b, score: score(b.title, $('q').value)}))
+      .filter(b => Number.isFinite(b.score)).sort((a, b) => a.score - b.score || a.start - b.start);
+    $('count').textContent = `${found.length} reservas encontradas`;
+    for (const b of found) {
+      const room = data.rooms.find(r => norm(r.full) === norm(b.room));
+      const dates = relativeDate(0, new Date(b.start)) !== relativeDate(0, new Date(b.end));
+      const tag = dates ? `${relativeDate(0, new Date(b.start))} ${clock(b.start)} — ${relativeDate(0, new Date(b.end))} ${clock(b.end)}` : `${clock(b.start)} — ${clock(b.end)}`;
+      $('results').append(card(b.title, tag, [b.room, academicLabel(b)].filter(Boolean), room ? link(room) : null, b.description));
+    }
+  } else if (mode === 'roomSchedule') {
+    const query = $('roomQuery').value.trim();
+    if (!query) { $('count').textContent = 'Ingresá el aula o edificio que querés consultar'; return; }
+    const start = Date.parse(data.date + 'T00:00:00-03:00'), end = start + 86400000;
+    const {byRoom, unmatched} = availableRooms(data.rooms, data.bookings, {start, end});
+    const found = data.rooms.filter(isPhysicalClassroom).map(room => ({room, score: roomSearchScore(room, query)}))
+      .filter(item => Number.isFinite(item.score)).sort((a, b) => a.score - b.score || a.room.full.localeCompare(b.room.full, 'es', {numeric:true}));
+    $('count').textContent = `${found.length} ${found.length === 1 ? "aula encontrada" : "aulas encontradas"} · ${data.date}`;
+    for (const {room} of found) {
+      const bookings = (byRoom.get(norm(room.full)) || []).filter(b => overlaps(b, start, end)).sort((a, b) => a.start - b.start);
+      const uncertain = unmatched.some(b => norm(b.room).startsWith(norm(room.areaName) + ' '));
+      const lines = [room.areaName];
+      if (!bookings.length) lines.push(uncertain ? 'Sin reservas asociadas; hay reservas del edificio sin aula identificada.' : 'Sin reservas registradas para esta fecha');
+      const el = card(room.name, null, lines, link(room));
+      for (const booking of bookings) {
+        const item = document.createElement('section'); item.className = 'schedule-booking';
+        const time = document.createElement('span'); time.className = 'badge'; time.textContent = bookingLabel(booking);
+        const title = document.createElement('h4'); title.textContent = booking.title;
+        item.append(time, title);
+        const label = academicLabel(booking);
+        if (label) { const p = document.createElement('p'); p.className = 'academic-label'; p.textContent = label; item.append(p); }
+        const description = meaningfulDescription(booking.description, booking.title);
+        if (description) {
+          const details = document.createElement('details'), summary = document.createElement('summary');
+          summary.textContent = 'Detalle'; details.append(summary, document.createTextNode(description)); item.append(details);
+        }
+        el.append(item);
+      }
+      $('results').append(el);
+    }
+  } else {
+    const range = currentInterval();
+    if (!range) {$('count').textContent = 'Ingresá un inicio válido y una duración entre 1 minuto y 24 horas'; return;}
+    const rooms = data.rooms.filter(r => isPhysicalClassroom(r)
+      && ($('campus').value !== 'Pilar' || $('building').value === 'all'
+        || (!!roomCode(r) && /olivo.*modulo [ab]\b|edificio roble|edificio ceibo/.test(norm(r.areaName)))));
+    const {byRoom, unmatched} = availableRooms(data.rooms, data.bookings, range);
+    let unknown = 0, free = [];
+    for (const room of rooms) {
+      if (unmatched.some(b => norm(b.room).startsWith(norm(room.areaName) + ' '))) {unknown++; continue;}
+      const bookings = byRoom.get(norm(room.full)) || [];
+      if (!bookings.some(b => overlaps(b, range.start, range.end))) {
+        const next = bookings.filter(b => b.start >= range.end).sort((a, b) => a.start - b.start)[0];
+        free.push({room, next});
+      }
+    }
+    const suffix = range.dayOffset ? ` del ${range.endDate}` : '';
+    $('count').textContent = `${free.length} aulas vacías de ${rooms.length} aulas · desde ${$('from').value} hasta ${range.to}${suffix}${unknown ? ' · ' + unknown + ' sin confirmar' : ''}`;
+    for (const {room, next} of free) {
+      const nextDate = next && relativeDate(0, new Date(next.start));
+      const upcoming = next ? `Próxima reserva: ${nextDate !== data.date ? nextDate + ' ' : ''}${clock(next.start)} · ${next.title}` : 'Sin reservas posteriores en los días consultados';
+      $('results').append(card(room.name, null, [room.areaName, upcoming], link(room)));
+    }
+  }
+  if (!$('results').children.length) {const p = document.createElement('p'); p.className = 'empty'; p.textContent = 'No encontramos resultados para esta búsqueda.'; $('results').append(p);}
+}
+function scheduleRefresh(delay = 300000) {
+  clearTimeout(refreshTimer);
+  if (location.protocol !== 'file:') refreshTimer = setTimeout(() => {if (document.visibilityState === 'visible') load(); else scheduleRefresh();}, delay);
+}
+async function load() {
+  clearTimeout(refreshTimer); const version = ++loadVersion;
+  loadController?.abort(); loadController = new AbortController();
+  const signal = loadController.signal, selected = scope(), {date, campus, endDate, key} = selected;
+  pendingKey = key; failedKey = '';
+  if (data?.key !== key) data = null;
+  render();
+  if (!date) {pendingKey = ''; $('status').className = ''; $('status').textContent = 'Elegí una fecha'; return;}
+  if (location.protocol === 'file:') {pendingKey = ''; failedKey = key; $('status').className = 'error'; $('status').textContent = 'Abrí la app con python3 server.py.'; render(); return;}
+  $('status').className = 'loading'; $('status').textContent = 'Sincronizando horarios…';
+  try {
+    const [year, month, day] = date.split('-'), [toYear, toMonth, toDay] = endDate.split('-');
+    const p = new URLSearchParams({From_year:year, From_month:month, From_day:day, To_year:toYear, To_month:toMonth, To_day:toDay, areamatch:campus, summarize:'5', sortby:'s', display:'e', sumby:'d'});
+    const [raw, grid] = await Promise.all([read('report.php?' + p, signal), read('day.php?' + dateParams(date), signal)]);
+    const bookings = parseBookings(raw), root = doc(grid);
+    const areas = [...root.querySelectorAll('#dwm_areas option')].map(o => ({id:o.value, name:tidy(o.textContent)}))
+      .filter(a => !campus || norm(a.name).startsWith(norm(campus) + ' '));
+    if (!areas.length) throw Error('No se pudo leer el inventario de áreas para ese campus.');
+    const rooms = [], partial = [], seen = new Set();
+    for (let i = 0; i < areas.length; i += 4) {
+      if (signal.aborted) return;
+      await Promise.all(areas.slice(i, i + 4).map(async area => {
+        try {
+          const p = dateParams(date); p.set('area', area.id);
+          const d = doc(await read('day.php?' + p, signal));
+          const links = [...d.querySelectorAll('thead a[href*="week.php"][href*="room="]')];
+          if (!links.length) throw Error('Sin inventario');
+          for (const a of links) {
+            const u = new URL(a.getAttribute('href'), BASE), id = u.searchParams.get('room');
+            if (u.searchParams.get('area') !== area.id || !id || seen.has(id)) continue;
+            const name = tidy(a.textContent).replace(/\s*\(\d+\)\s*$/, '');
+            rooms.push({id, area:area.id, areaName:area.name, name, full:tidy(area.name + ' - ' + name)}); seen.add(id);
+          }
+        } catch (e) {if (signal.aborted) throw e; partial.push(area.name);}
+      }));
+    }
+    if (version !== loadVersion || signal.aborted) return;
+    data = {bookings, rooms, date, key}; pendingKey = ''; lastLoadedAt = Date.now(); updateAcademicFilters();
+    $('status').className = partial.length ? 'error' : '';
+    $('status').textContent = `Sync ${clock(lastLoadedAt)}${partial.length ? ' · Inventario incompleto: ' + partial.join(', ') : ''}`;
+    render(); scheduleRefresh(partial.length ? 30000 : 300000);
+  } catch (e) {
+    if (version !== loadVersion || signal.aborted) return;
+    data = null; pendingKey = ''; failedKey = key;
+    $('status').className = 'error'; $('status').textContent = 'Error de conexión. ' + e.message + ' Reintentando automáticamente…';
+    render(); scheduleRefresh(20000);
+  }
+}
+for (const [id, days] of [['today',0], ['tomorrow',1]]) $(id).onclick = () => {$('date').value = relativeDate(days); syncEnd(); load();};
+for (const id of ['date', 'campus']) $(id).addEventListener('change', () => {syncEnd(); $('building').disabled = $('campus').value !== 'Pilar'; if ($('building').disabled) $('building').value = 'all'; load();});
+$('now').onclick = () => {$('date').value = relativeDate(); $('from').value = clock(Date.now()); updateRange();};
+for (const id of ['from', 'hours']) $(id).addEventListener('input', updateRange);
+$('to').addEventListener('input', () => {
+  const start = minutes($('from').value), end = minutes($('to').value);
+  let delta = end - start; if (delta < 0) delta += 1440;
+  $('hours').value = Number.isFinite(delta) ? String(Math.round(delta / 60 * 1000000) / 1000000) : '';
+  updateRange();
+});
+$('faculty').addEventListener('change', () => { $('career').value = ''; updateAcademicFilters(); render(); });
+$('career').addEventListener('change', () => render());
+const pickers = new Map();
+function selectedLabel(id) {
+  return [...$(id).children].find(o => o.value === $(id).value)?.textContent || 'Todas';
+}
+function refreshPicker(id) {
+  const state = pickers.get(id); if (!state) return;
+  if (!state.open) { $(id + 'Search').value = selectedLabel(id); return; }
+  const list = $(id + 'Options'), query = norm($(id + 'Search').value);
+  const options = [...$(id).children].filter(o => !query || norm(o.textContent).includes(query));
+  state.options = options; state.active = -1; list.replaceChildren();
+  $(id + 'Search').removeAttribute('aria-activedescendant');
+  for (const [index, option] of options.entries()) {
+    const button = document.createElement('button'); button.type = 'button'; button.tabIndex = -1;
+    button.id = id + '-option-' + index; button.textContent = option.textContent;
+    button.setAttribute('role', 'option'); button.setAttribute('aria-selected', String(option.value === $(id).value));
+    button.addEventListener('mousedown', event => event.preventDefault());
+    button.addEventListener('click', () => choosePicker(id, index)); list.append(button);
+  }
+  if (!options.length) { const empty = document.createElement('div'); empty.className = 'picker-empty'; empty.textContent = 'Sin coincidencias'; list.append(empty); }
+}
+function closePicker(id) {
+  const state = pickers.get(id); state.open = false; $(id + 'Options').hidden = true;
+  $(id + 'Search').setAttribute('aria-expanded', 'false'); $(id + 'Search').removeAttribute('aria-activedescendant');
+  $(id + 'Search').value = selectedLabel(id);
+}
+function openPicker(id) {
+  for (const other of pickers.keys()) if (other !== id) closePicker(other);
+  const state = pickers.get(id); if (state.open) return;
+  state.open = true; $(id + 'Search').value = ''; $(id + 'Search').setAttribute('aria-expanded', 'true');
+  $(id + 'Options').hidden = false; refreshPicker(id);
+}
+function choosePicker(id, index) {
+  const option = pickers.get(id).options[index]; if (!option) return;
+  $(id).value = option.value; closePicker(id); $(id).dispatchEvent(new Event('change'));
+}
+for (const id of ['faculty', 'career']) {
+  pickers.set(id, {open:false, active:-1, options:[]});
+  const input = $(id + 'Search');
+  input.addEventListener('focus', () => openPicker(id));
+  input.addEventListener('click', () => openPicker(id));
+  input.addEventListener('input', () => { if (!pickers.get(id).open) openPicker(id); refreshPicker(id); });
+  input.addEventListener('blur', () => closePicker(id));
+  input.addEventListener('keydown', event => {
+    const state = pickers.get(id);
+    if (event.key === 'Escape' || event.key === 'Tab') { closePicker(id); return; }
+    if (event.key === 'Enter') { event.preventDefault(); if (!state.open) openPicker(id); else choosePicker(id, state.active >= 0 ? state.active : 0); return; }
+    if (!['ArrowDown', 'ArrowUp', 'Home', 'End'].includes(event.key)) return;
+    event.preventDefault(); openPicker(id); if (!state.options.length) return;
+    const last = state.options.length - 1;
+    state.active = event.key === 'Home' ? 0 : event.key === 'End' ? last : (state.active < 0 ? (event.key === 'ArrowUp' ? last : 0) : (state.active + (event.key === 'ArrowUp' ? -1 : 1) + state.options.length) % state.options.length);
+    const buttons = [...$(id + 'Options').children];
+    buttons.forEach((button, index) => { button.className = index === state.active ? 'active' : ''; });
+    input.setAttribute('aria-activedescendant', buttons[state.active].id); buttons[state.active].scrollIntoView({block:'nearest'});
+  });
+}
+for (const id of ['q', 'roomQuery', 'building']) $(id).addEventListener('input', () => render());
+const tabs = ['subjects', 'rooms', 'roomSchedule'];
+function selectTab(tab) {
+  mode = tab;
+  for (const id of tabs) {$(id).setAttribute('aria-selected', String(mode === id)); $(id).tabIndex = mode === id ? 0 : -1;}
+  $('subjectForm').hidden = mode !== 'subjects'; $('roomForm').hidden = mode !== 'rooms'; $('scheduleForm').hidden = mode !== 'roomSchedule'; render();
+}
+for (const tab of tabs) {
+  $(tab).onclick = () => selectTab(tab);
+  $(tab).onkeydown = e => {
+    if (!['ArrowLeft','ArrowRight','Home','End'].includes(e.key)) return;
+    e.preventDefault();
+    const index = tabs.indexOf(mode), delta = e.key === 'ArrowLeft' ? -1 : 1;
+    const next = e.key === 'Home' ? tabs[0] : e.key === 'End' ? tabs[tabs.length - 1] : tabs[(index + delta + tabs.length) % tabs.length];
+    selectTab(next); $(next).focus();
+  };
+}
+addEventListener('online', load);
+document.addEventListener('visibilitychange', () => {if (document.visibilityState === 'visible' && !pendingKey && Date.now() - lastLoadedAt >= 300000) load();});
+syncEnd();
+</script>
+<script>// Android-specific interaction layer. All matching and availability rules are shared with desktop.
+let visibleLimit = 30;
+const storageKey = 'campus-android-v1';
+const persistentFields = ['campus', 'q', 'roomQuery', 'from', 'hours', 'building'];
+function savePreferences() {
+  try {
+    const fields = Object.fromEntries(persistentFields.map(id => [id, $(id).value]));
+    localStorage.setItem(storageKey, JSON.stringify({...fields, mode, date: $('date').value, savedDay: relativeDate()}));
+  } catch {}
+}
+try {
+  const preferences = JSON.parse(localStorage.getItem(storageKey) || '{}');
+  for (const id of persistentFields) if (typeof preferences[id] === 'string') $(id).value = preferences[id];
+  if (preferences.savedDay === relativeDate() && /^\d{4}-\d{2}-\d{2}$/.test(preferences.date)) $('date').value = preferences.date;
+  if (tabs.includes(preferences.mode)) mode = preferences.mode;
+  if (!preferences.from) $('from').value = clock(Date.now());
+} catch { $('from').value = clock(Date.now()); }
+$('building').disabled = $('campus').value !== 'Pilar';
+if ($('building').disabled) $('building').value = 'all';
+
+function syncChrome() {
+  const busy = Boolean(pendingKey), failed = failedKey === scope().key && !data;
+  $('loading').hidden = !busy || Boolean(data);
+  $('errorState').hidden = !failed;
+  $('results').setAttribute('aria-busy', String(busy));
+  $('refresh').disabled = busy;
+  $('refresh').textContent = busy ? 'Cargando…' : 'Actualizar';
+  for (const [id, days] of [['today', 0], ['tomorrow', 1]]) $(id).setAttribute('aria-pressed', String($('date').value === relativeDate(days)));
+  for (const button of document.querySelectorAll('[data-hours]')) button.setAttribute('aria-pressed', String(Number(button.dataset.hours) === Number($('hours').value.replace(',', '.'))));
+  $('clearSubject').hidden = !$('q').value;
+  $('clearRoom').hidden = !$('roomQuery').value;
+  const filterCount = ['faculty', 'career'].filter(id => $(id).value).length;
+  $('filterCount').textContent = filterCount ? `(${filterCount})` : '';
+}
+const renderPlanning = render;
+render = function() {
+  renderPlanning();
+  $('count').textContent = $('count').textContent.replace('1 reservas encontradas', '1 reserva encontrada').replace('aulas vacías', 'aulas libres');
+  const cards = [...$('results').querySelectorAll(':scope > .card')];
+  cards.forEach((element, index) => {
+    element.hidden = index >= visibleLimit;
+    if (mode === 'rooms') {
+      const name = element.querySelector('h3').textContent;
+      const button = document.createElement('button');
+      button.type = 'button'; button.className = 'schedule-action'; button.textContent = 'Ver horarios del aula →';
+      button.onclick = () => {
+        $('roomQuery').value = roomCode({name}) || name;
+        selectMobileTab('roomSchedule');
+      };
+      element.append(button);
+    }
+  });
+  $('more').hidden = cards.length <= visibleLimit;
+  if (!$('more').hidden) $('more').textContent = `Mostrar más · ${Math.min(visibleLimit, cards.length)} de ${cards.length}`;
+  const empty = $('results').querySelector('.empty');
+  if (empty) empty.textContent = mode === 'subjects' ? 'No hay coincidencias. Probá con menos palabras, quitá filtros o elegí otra fecha.' : mode === 'roomSchedule' ? 'No encontramos esa aula. Probá con el código (R2, C8.1) o el nombre del edificio.' : 'No hay aulas confirmadas como libres en ese intervalo. Probá otro horario o edificio.';
+  syncChrome();
+};
+function selectMobileTab(tab) {
+  visibleLimit = 30;
+  document.activeElement?.blur();
+  selectTab(tab);
+  document.querySelector('.search-panel').scrollIntoView({block: 'start'});
+  savePreferences();
+}
+for (const tab of tabs) $(tab).onclick = () => selectMobileTab(tab);
+$('refresh').onclick = $('retry').onclick = () => load();
+$('seeRooms').onclick = () => { document.activeElement?.blur(); document.querySelector('.results-heading').scrollIntoView({block:'start'}); };
+$('more').onclick = () => { visibleLimit += 30; render(); };
+$('top').onclick = () => window.scrollTo({top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
+addEventListener('scroll', () => { $('top').hidden = scrollY < 500; }, {passive: true});
+for (const button of document.querySelectorAll('[data-hours]')) button.onclick = () => {
+  $('hours').value = button.dataset.hours; updateRange(); syncChrome(); savePreferences();
+};
+for (const [buttonId, inputId] of [['clearSubject', 'q'], ['clearRoom', 'roomQuery']]) $(buttonId).onclick = () => {
+  $(inputId).value = ''; visibleLimit = 30; render(); savePreferences(); $(inputId).focus();
+};
+$('resetFilters').onclick = () => {
+  $('faculty').value = ''; $('career').value = ''; updateAcademicFilters(); visibleLimit = 30; render();
+};
+for (const id of [...persistentFields, 'date', 'to', 'faculty', 'career']) {
+  $(id).addEventListener('input', () => { visibleLimit = 30; render(); savePreferences(); });
+  $(id).addEventListener('change', () => { visibleLimit = 30; render(); savePreferences(); });
+}
+for (const id of ['today', 'tomorrow', 'now']) $(id).addEventListener('click', () => { syncChrome(); savePreferences(); });
+for (const id of ['q', 'roomQuery']) $(id).addEventListener('keydown', event => { if (event.key === 'Enter') { event.preventDefault(); $(id).blur(); document.querySelector('.results-heading').scrollIntoView({block:'start'}); } });
+// Native lifecycle callbacks prevent polling while the application is in the background.
+window.campusPause = () => { savePreferences(); clearTimeout(refreshTimer); loadController?.abort(); pendingKey = ''; syncChrome(); };
+window.campusResume = () => { if (!pendingKey && (!data || Date.now() - lastLoadedAt >= 300000)) load(); else scheduleRefresh(); };
+addEventListener('pagehide', () => { savePreferences(); clearTimeout(refreshTimer); loadController?.abort(); });
+new MutationObserver(syncChrome).observe($('status'), {childList:true, characterData:true, attributes:true, subtree:true});
+syncEnd(); selectTab(mode); load();
+</script>
+</body></html>
