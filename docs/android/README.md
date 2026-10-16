@@ -12,6 +12,12 @@ Checks cover 320, 360, 390, 412, and 768 px layouts, enlarged control text, both
 | --- | --- | --- |
 | ![Materias](materias.png) | ![Aulas libres](libres.png) | ![Aula claro](aula-claro.png) |
 
+## Ícono de Android
+
+Desde 1.0.1 el launcher usa un ícono adaptativo: fondo oscuro opaco en toda la máscara, lupa celeste dentro de la zona segura y variante monocromática para Android 13+. `icon` y `roundIcon` apuntan al mismo recurso adaptativo para evitar el fondo blanco que algunos launchers agregan a los íconos antiguos.
+
+![Vista previa del ícono con máscaras circular, redondeada y superelipse](icono.png)
+
 ## Build
 
 Install JDK 21 and an Android SDK with `platforms;android-35` and `build-tools;35.0.0`. Set `ANDROID_HOME` or `android/local.properties` (`sdk.dir=...`).
@@ -35,7 +41,7 @@ The APK uses a bundled WebView interface on `https://appassets.androidplatform.n
 The private key is never committed. Supply `CAMPUS_SIGNING_DIR` containing `release.p12` (alias `campuslookup`) and a `password` file, then run:
 
 ```sh
-ANDROID_HOME=/path/to/sdk CAMPUS_SIGNING_DIR=/private/signing scripts/sign-android.sh 1.0.0
+ANDROID_HOME=/path/to/sdk CAMPUS_SIGNING_DIR=/private/signing scripts/sign-android.sh 1.0.1
 ```
 
 The script aligns, signs, verifies, and hashes the APK into ignored `artifacts/`. Preserve the original key for compatible updates. GitHub Actions verifies branches, PRs, and `android-v*` tags and produces unsigned build artifacts. Sign verified builds locally, then attach the signed APK and SHA256SUMS to the GitHub release. Signing credentials stay local in the ignored `.signing/` directory; keep a private backup. Bump versionCode/versionName in `android/app/build.gradle.kts` before a subsequent tag.

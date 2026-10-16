@@ -3,7 +3,7 @@ set -euo pipefail
 project_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 : "${ANDROID_HOME:?Set ANDROID_HOME to your Android SDK}"
 : "${CAMPUS_SIGNING_DIR:?Set CAMPUS_SIGNING_DIR to the directory with release.p12 and password}"
-version="${1:-1.0.0}"
+version="${1:-1.0.1}"
 [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Expected a semantic version' >&2; exit 1; }
 build_tools="$ANDROID_HOME/build-tools/35.0.0"
 output_dir="$project_dir/artifacts"
