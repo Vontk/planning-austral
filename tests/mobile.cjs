@@ -14,7 +14,7 @@ const csv = row(headings)+'\n'+bookings.join('\n');
 const grid = '<select id="dwm_areas"><option value="65">Pilar - Edificio Roble</option></select><table><thead><tr><td><a href="week.php?area=65&room=1">Aula R2 (30)</a></td><td><a href="week.php?area=65&room=2">Aula R3 (30)</a></td></tr></thead></table>';
 (async()=>{
  const browser=await chromium.launch({headless:true, ...(process.env.CAMPUS_CHROME ? {executablePath:process.env.CAMPUS_CHROME} : {}),args:['--no-sandbox']});
- const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,locale:'es-AR'});
+ const context=await browser.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,colorScheme:'dark',locale:'es-AR'});
  const page=await context.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  await context.route('**/*',async route=>{
@@ -27,11 +27,14 @@ const grid = '<select id="dwm_areas"><option value="65">Pilar - Edificio Roble</
   return route.fulfill({status:404,body:''});
  });
  await page.goto(origin);
+ await page.waitForFunction(()=>Boolean(customElements.get('md-filled-button')));
+ assert.equal(await page.locator('#seeRooms').evaluate(element=>Boolean(element.shadowRoot)),true,'Official Material button is initialized');
  await page.locator('#date').fill(date);
  await page.locator('#date').dispatchEvent('change');
  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Sync'));
  assert.match(await page.locator('#count').innerText(),/45 reservas/);
  assert.equal(await page.locator('.card:visible').count(),30);
+ assert.equal(await page.locator('.card').count(),30,'Pagination bounds DOM allocation');
  await page.locator('#more').click();assert.equal(await page.locator('.card:visible').count(),45);
  await page.locator('#q').fill('analisis 2');
  assert.equal(await page.locator('.card:visible').count(),1);
@@ -90,6 +93,16 @@ const grid = '<select id="dwm_areas"><option value="65">Pilar - Edificio Roble</
  fail=false;await page.locator('#retry').click();
  await page.waitForFunction(()=>document.querySelector('#status').textContent.startsWith('Sync'));
  assert.equal(await page.locator('#errorState').isVisible(),false);
+ // Android theme injection takes precedence over a previously saved manual theme.
+ const nativePage = await context.newPage();
+ nativePage.on('pageerror',e=>errors.push(String(e)));
+ await nativePage.route(origin+'/', route => route.fulfill({contentType:'text/html',body:html.replace('<!-- NATIVE_THEME -->',
+  "<style>:root:root{--blue:#aacc88}#theme{display:none}</style><script>window.campusNativeTheme='light';</script>")}));
+ await nativePage.goto(origin);
+ assert.equal(await nativePage.locator('html').getAttribute('data-theme'),'light');
+ assert.equal(await nativePage.locator('#theme').isVisible(),false);
+ assert.equal(await nativePage.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--blue')),'#aacc88');
+ await nativePage.close();
  assert.deepEqual(errors,[]);
  await browser.close();console.log('PASS: mobile workflows, filtering, pagination, midnight, persistence, themes, retry, stale-data protection, 320–768px and large text.');
 })().catch(e=>{console.error(e);process.exit(1)});

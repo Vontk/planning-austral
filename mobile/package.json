@@ -1,1 +1,14 @@
-{"private":true,"scripts":{"test":"node ../tests/mobile.cjs"},"devDependencies":{"playwright":"1.58.2"}}
+{
+  "private": true,
+  "scripts": {
+    "test": "node ../tests/mobile.cjs",
+    "build": "python3 ../scripts/build-mobile.py"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12",
+    "playwright": "1.58.2"
+  },
+  "dependencies": {
+    "@material/web": "2.4.1"
+  }
+}

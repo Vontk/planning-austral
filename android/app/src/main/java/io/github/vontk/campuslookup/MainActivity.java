@@ -1,13 +1,19 @@
 package io.github.vontk.campuslookup;
 
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.graphics.Color;
+import android.graphics.Insets;
+import android.content.res.Configuration;
+import android.os.Build;
+import android.view.View;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.widget.FrameLayout;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.ViewGroup;
 import android.webkit.CookieManager;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -33,15 +39,46 @@ public class MainActivity extends Activity {
     @SuppressLint("SetJavaScriptEnabled")
     @Override public void onCreate(Bundle state) {
         super.onCreate(state);
+        boolean dark = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+            == Configuration.UI_MODE_NIGHT_YES;
+        int background = dark ? 0xff141218 : 0xfffef7ff;
+        if (Build.VERSION.SDK_INT >= 31) background = getColor(dark
+            ? android.R.color.system_neutral1_900 : android.R.color.system_neutral1_10);
+        if (Build.VERSION.SDK_INT < 35) {
+            getWindow().setStatusBarColor(background);
+            getWindow().setNavigationBarColor(background);
+        }
+        FrameLayout container = new FrameLayout(this);
+        container.setBackgroundColor(background);
         web = new WebView(this);
-        web.setBackgroundColor(Color.rgb(30, 30, 30));
-        web.setLayoutParams(new ViewGroup.LayoutParams(-1, -1));
-        web.setOnApplyWindowInsetsListener((view, insets) -> {
+        web.setBackgroundColor(background);
+        container.addView(web, new FrameLayout.LayoutParams(-1, -1));
+        // Resize the WebView itself: fixed web controls must stay inside the safe viewport.
+        // Padding WebView instead leaves fixed-position elements underneath system bars.
+        container.setOnApplyWindowInsetsListener((view, insets) -> {
+            if (Build.VERSION.SDK_INT >= 30) {
+                Insets safe = insets.getInsets(WindowInsets.Type.systemBars()
+                    | WindowInsets.Type.displayCutout() | WindowInsets.Type.ime());
+                view.setPadding(safe.left, safe.top, safe.right, safe.bottom);
+                return new WindowInsets.Builder(insets)
+                    .setInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout()
+                        | WindowInsets.Type.ime(), Insets.NONE).build();
+            }
             view.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
                 insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
             return insets.consumeSystemWindowInsets();
         });
-        setContentView(web);
+        if (Build.VERSION.SDK_INT >= 30) getWindow().setDecorFitsSystemWindows(false);
+        setContentView(container);
+        if (Build.VERSION.SDK_INT >= 30) {
+            getWindow().getInsetsController().setSystemBarsAppearance(dark ? 0 :
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS,
+                WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS);
+        } else {
+            getWindow().getDecorView().setSystemUiVisibility(dark ? 0 :
+                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | (Build.VERSION.SDK_INT >= 27 ? View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR : 0));
+        }
+        container.requestApplyInsets();
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -71,8 +108,43 @@ public class MainActivity extends Activity {
         });
         web.setDownloadListener((url, userAgent, disposition, type, length) -> openExternal(Uri.parse(url)));
         try (InputStream input = getAssets().open("index.html")) {
-            web.loadDataWithBaseURL(ORIGIN + "/", new String(readBounded(input), StandardCharsets.UTF_8), "text/html", "UTF-8", null);
+            web.loadDataWithBaseURL(ORIGIN + "/", new String(readBounded(input), StandardCharsets.UTF_8).replace("<!-- NATIVE_THEME -->", nativeTheme(dark)), "text/html", "UTF-8", null);
         } catch (Exception error) { throw new IllegalStateException("Bundled interface missing", error); }
+    }
+
+    private String nativeTheme(boolean dark) {
+        StringBuilder css = new StringBuilder(":root:root{color-scheme:" + (dark ? "dark" : "light") + ";");
+        if (Build.VERSION.SDK_INT >= 31) css.append(dynamicPalette(dark));
+        css.append("--orange:").append(dark ? "#ffb4ab" : "#b3261e").append(";}#theme{display:none}");
+        return "<style>" + css + "</style><script>window.campusNativeTheme='" + (dark ? "dark" : "light") + "';</script>";
+    }
+
+    @TargetApi(31)
+    private String dynamicPalette(boolean dark) {
+        String[] names = {"--background", "--text", "--surface", "--input", "--line", "--muted", "--blue", "--purple", "--green", "--orange", "--secondary", "--selected", "--on-primary"};
+        int[] resources = dark ? new int[] {
+            android.R.color.system_neutral1_900, android.R.color.system_neutral1_50,
+            android.R.color.system_neutral1_800, android.R.color.system_neutral2_800,
+            android.R.color.system_neutral2_500, android.R.color.system_neutral2_200,
+            android.R.color.system_accent1_200, android.R.color.system_accent2_200,
+            android.R.color.system_accent3_200, android.R.color.system_accent3_200,
+            android.R.color.system_neutral2_100, android.R.color.system_accent2_700,
+            android.R.color.system_accent1_800
+        } : new int[] {
+            android.R.color.system_neutral1_10, android.R.color.system_neutral1_900,
+            android.R.color.system_neutral1_50, android.R.color.system_neutral2_100,
+            android.R.color.system_neutral2_500, android.R.color.system_neutral2_600,
+            android.R.color.system_accent1_600, android.R.color.system_accent2_600,
+            android.R.color.system_accent3_600, android.R.color.system_accent3_600,
+            android.R.color.system_neutral2_700, android.R.color.system_accent2_100,
+            android.R.color.system_accent1_0
+        };
+        StringBuilder css = new StringBuilder();
+        for (int i = 0; i < names.length; i++) {
+            css.append(names[i]).append(':').append(String.format(java.util.Locale.ROOT,
+                "#%06x", getColor(resources[i]) & 0xffffff)).append(';');
+        }
+        return css.toString();
     }
 
     private void openExternal(Uri uri) {
@@ -109,7 +181,7 @@ public class MainActivity extends Activity {
             connection.setInstanceFollowRedirects(false);
             connection.setConnectTimeout(15000);
             connection.setReadTimeout(35000);
-            connection.setRequestProperty("User-Agent", "CampusLookupAndroid/1.0");
+            connection.setRequestProperty("User-Agent", "CampusLookupAndroid/2.0");
             connection.setRequestProperty("Accept-Encoding", "identity");
             if (connection.getResponseCode() != 200) throw new java.io.IOException("Planning unavailable");
             String type = connection.getContentType();

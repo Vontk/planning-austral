@@ -1,5 +1,10 @@
 // Android-specific interaction layer. All matching and availability rules are shared with desktop.
 let visibleLimit = 30;
+let mobileResultCount = 0;
+function pageResults(items) {
+  mobileResultCount = items.length;
+  return items.slice(0, visibleLimit);
+}
 const storageKey = 'campus-android-v1';
 const persistentFields = ['campus', 'q', 'roomQuery', 'from', 'hours', 'building'];
 function savePreferences() {
@@ -26,7 +31,10 @@ function syncChrome() {
   $('refresh').disabled = busy;
   $('refresh').textContent = busy ? 'Cargando…' : 'Actualizar';
   for (const [id, days] of [['today', 0], ['tomorrow', 1]]) $(id).setAttribute('aria-pressed', String($('date').value === relativeDate(days)));
-  for (const button of document.querySelectorAll('[data-hours]')) button.setAttribute('aria-pressed', String(Number(button.dataset.hours) === Number($('hours').value.replace(',', '.'))));
+  for (const button of document.querySelectorAll('[data-hours]')) {
+    button.selected = Number(button.dataset.hours) === Number($('hours').value.replace(',', '.'));
+    button.setAttribute('aria-pressed', String(button.selected));
+  }
   $('clearSubject').hidden = !$('q').value;
   $('clearRoom').hidden = !$('roomQuery').value;
   const filterCount = ['faculty', 'career'].filter(id => $(id).value).length;
@@ -34,11 +42,11 @@ function syncChrome() {
 }
 const renderPlanning = render;
 render = function() {
+  mobileResultCount = 0;
   renderPlanning();
   $('count').textContent = $('count').textContent.replace('1 reservas encontradas', '1 reserva encontrada').replace('aulas vacías', 'aulas libres');
   const cards = [...$('results').querySelectorAll(':scope > .card')];
-  cards.forEach((element, index) => {
-    element.hidden = index >= visibleLimit;
+  cards.forEach(element => {
     if (mode === 'rooms') {
       const name = element.querySelector('h3').textContent;
       const button = document.createElement('button');
@@ -50,8 +58,8 @@ render = function() {
       element.append(button);
     }
   });
-  $('more').hidden = cards.length <= visibleLimit;
-  if (!$('more').hidden) $('more').textContent = `Mostrar más · ${Math.min(visibleLimit, cards.length)} de ${cards.length}`;
+  $('more').hidden = mobileResultCount <= visibleLimit;
+  if (!$('more').hidden) $('more').textContent = `Mostrar más · ${Math.min(visibleLimit, mobileResultCount)} de ${mobileResultCount}`;
   const empty = $('results').querySelector('.empty');
   if (empty) empty.textContent = mode === 'subjects' ? 'No hay coincidencias. Probá con menos palabras, quitá filtros o elegí otra fecha.' : mode === 'roomSchedule' ? 'No encontramos esa aula. Probá con el código (R2, C8.1) o el nombre del edificio.' : 'No hay aulas confirmadas como libres en ese intervalo. Probá otro horario o edificio.';
   syncChrome();
