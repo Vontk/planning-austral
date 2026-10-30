@@ -6,24 +6,34 @@ function pageResults(items) {
   return items.slice(0, visibleLimit);
 }
 const storageKey = 'campus-android-v1';
-const persistentFields = ['campus', 'q', 'roomQuery', 'from', 'hours', 'building'];
+const persistentFields = ['campus', 'q', 'roomQuery', 'building'];
 function savePreferences() {
   try {
     const fields = Object.fromEntries(persistentFields.map(id => [id, $(id).value]));
-    localStorage.setItem(storageKey, JSON.stringify({...fields, mode, date: $('date').value, savedDay: relativeDate()}));
-  } catch {}
+    localStorage.setItem(storageKey, JSON.stringify(fields));
+ } catch {}
 }
 try {
   const preferences = JSON.parse(localStorage.getItem(storageKey) || '{}');
   for (const id of persistentFields) if (typeof preferences[id] === 'string') $(id).value = preferences[id];
-  if (preferences.savedDay === relativeDate() && /^\d{4}-\d{2}-\d{2}$/.test(preferences.date)) $('date').value = preferences.date;
-  if (tabs.includes(preferences.mode)) mode = preferences.mode;
-  if (!preferences.from) $('from').value = clock(Date.now());
-} catch { $('from').value = clock(Date.now()); }
+} catch {}
+// A new launch starts with an immediately useful search, never an old saved interval.
+mode = 'rooms';
+$('date').value = relativeDate();
+$('from').value = clock(Date.now());
+$('hours').value = '1';
 $('building').disabled = $('campus').value !== 'Pilar';
 if ($('building').disabled) $('building').value = 'all';
 
 function syncChrome() {
+  const range = currentInterval();
+  $('timeSummary').textContent = `${$('from').value} – ${range ? range.to : '…'}${range?.dayOffset ? ' (+1)' : ''}`;
+  const custom = ![1, 2, 3].includes(Number($('hours').value.replace(',', '.')));
+  $('customDuration').selected = custom;
+  $('customDuration').setAttribute('aria-label', custom && range ? `Horario personalizado, ${range.minutes} minutos` : 'Horario personalizado');
+  const differentContext = $('campus').value !== 'Pilar' || $('date').value !== relativeDate();
+  $('contextSummary').hidden = !differentContext;
+  $('contextSummary').textContent = `${$('campus').value || 'Todos'} · ${$('date').value === relativeDate() ? 'Hoy' : $('date').value}`;
   $('navigation').activeIndex = tabs.indexOf(mode);
   $('pageTitle').textContent = {subjects:'Materias', rooms:'Aulas libres', roomSchedule:'Por aula'}[mode];
   const busy = Boolean(pendingKey), failed = failedKey === scope().key && !data;
@@ -45,14 +55,14 @@ function syncChrome() {
 const renderPlanning = render;
 render = function() {
   mobileResultCount = 0;
-  renderPlanning();
+  if (mode === 'subjects') renderPlanning(); else renderMobileRooms();
   $('count').textContent = $('count').textContent.replace('1 reservas encontradas', '1 reserva encontrada').replace('aulas vacías', 'aulas libres');
   const cards = [...$('results').querySelectorAll(':scope > .card')];
   cards.forEach(element => {
     if (mode === 'rooms') {
       const name = element.querySelector('h3').textContent;
-      const button = document.createElement('md-outlined-button');
-      button.type = 'button'; button.className = 'schedule-action'; button.textContent = 'Ver horarios del aula →';
+      const button = document.createElement('md-filled-tonal-button');
+      button.type = 'button'; button.className = 'schedule-action'; button.textContent = 'Horarios';
       button.onclick = () => {
         $('roomQuery').value = roomCode({name}) || name;
         selectMobileTab('roomSchedule');
@@ -63,7 +73,7 @@ render = function() {
   $('more').hidden = mobileResultCount <= visibleLimit;
   if (!$('more').hidden) $('more').textContent = `Mostrar más · ${Math.min(visibleLimit, mobileResultCount)} de ${mobileResultCount}`;
   const empty = $('results').querySelector('.empty');
-  if (empty) empty.textContent = mode === 'subjects' ? 'No hay coincidencias. Probá con menos palabras, quitá filtros o elegí otra fecha.' : mode === 'roomSchedule' ? 'No encontramos esa aula. Probá con el código (R2, C8.1) o el nombre del edificio.' : 'No hay aulas confirmadas como libres en ese intervalo. Probá otro horario o edificio.';
+  if (empty) empty.textContent = mode === 'subjects' ? 'Sin coincidencias' : mode === 'roomSchedule' ? 'Sin coincidencias' : 'Sin aulas libres';
   syncChrome();
 };
 function selectMobileTab(tab) {
@@ -78,7 +88,11 @@ $('navigation').addEventListener('navigation-bar-activated', event => {
   if (tab && tab !== mode) selectMobileTab(tab);
 });
 $('refresh').onclick = $('retry').onclick = () => load();
-$('seeRooms').onclick = () => { document.activeElement?.blur(); document.querySelector('.results-heading').scrollIntoView({block:'start'}); };
+$('settingsButton').onclick = () => $('settingsDialog').show();
+$('closeSettings').onclick = () => $('settingsDialog').close();
+$('editTime').onclick = $('customDuration').onclick = () => $('timeDialog').show();
+$('timeDialog').addEventListener('closed', () => { syncChrome(); savePreferences(); });
+$('closeTime').onclick = () => { if (currentInterval()) $('timeDialog').close(); else { $('from').reportValidity(); $('hours').reportValidity(); } };
 $('more').onclick = () => { visibleLimit += 30; render(); };
 $('top').onclick = () => window.scrollTo({top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth'});
 addEventListener('scroll', () => { $('top').hidden = scrollY < 500; }, {passive: true});
@@ -91,7 +105,7 @@ for (const [buttonId, inputId] of [['clearSubject', 'q'], ['clearRoom', 'roomQue
 $('resetFilters').onclick = () => {
   $('faculty').value = ''; $('career').value = ''; updateAcademicFilters(); visibleLimit = 30; render();
 };
-for (const id of [...persistentFields, 'date', 'to', 'faculty', 'career']) {
+for (const id of [...persistentFields, 'date', 'from', 'hours', 'to', 'faculty', 'career']) {
   $(id).addEventListener('input', () => { visibleLimit = 30; render(); savePreferences(); });
   $(id).addEventListener('change', () => { visibleLimit = 30; render(); savePreferences(); });
 }

@@ -10,52 +10,50 @@
 </head>
 <!-- NATIVE_THEME -->
 <body>
-<header><div><h1 id="pageTitle">Materias</h1></div><md-text-button id="theme" type="button">Tema claro</md-text-button></header>
+<header><div><h1 id="pageTitle">Aulas libres</h1><span id="contextSummary" hidden></span></div><md-filled-tonal-icon-button id="settingsButton" aria-label="Ajustes de búsqueda"><!-- ICON:settings --></md-filled-tonal-icon-button></header>
 <main>
-<section class="context" aria-label="Fecha y campus">
-<md-filled-select id="campus" label="Campus"><md-select-option value="Pilar" selected><div slot="headline">Pilar</div></md-select-option><md-select-option value="Bs. As."><div slot="headline">Buenos Aires</div></md-select-option><md-select-option value="Rosario"><div slot="headline">Rosario</div></md-select-option><md-select-option value=""><div slot="headline">Todos</div></md-select-option></md-filled-select>
-<div class="date-field"><md-filled-text-field id="date" type="date" required aria-describedby="timezone" label="Fecha" no-asterisk></md-filled-text-field><div class="date-shortcuts"><md-outlined-button id="today" type="button">Hoy</md-outlined-button><md-outlined-button id="tomorrow" type="button">Mañana</md-outlined-button></div></div>
-</section>
 <div class="sync"><div id="status" role="status" aria-live="polite">Conectando con Planning…</div><md-text-button id="refresh" type="button">Actualizar</md-text-button></div>
 <section class="search-panel">
 <div id="subjectForm" role="tabpanel" aria-labelledby="subjects">
 
-<div class="search-wrap"><md-outlined-text-field id="q" type="search" placeholder="Ej. Análisis II" autocomplete="off" enterkeyhint="search" label="Materia" no-asterisk><md-icon-button slot="trailing-icon" id="clearSubject" class="clear" aria-label="Borrar materia" hidden><!-- ICON:close --></md-icon-button></md-outlined-text-field></div>
+<div class="search-wrap"><md-filled-text-field id="q" type="search" placeholder="Análisis II" autocomplete="off" enterkeyhint="search" label="Materia" no-asterisk><md-icon-button slot="trailing-icon" id="clearSubject" class="clear" aria-label="Borrar materia" hidden><!-- ICON:close --></md-icon-button></md-filled-text-field></div>
 <details id="filters" class="filters"><summary>Facultad y carrera <span id="filterCount"></span></summary>
-<div class="filter-content"><div class="academic-filter"><div class="academic-picker"><md-outlined-text-field id="facultySearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="facultyOptions" autocomplete="off" value="Todas" label="Facultad / unidad" no-asterisk></md-outlined-text-field><span class="picker-arrow" aria-hidden="true">⌄</span><div id="facultyOptions" class="picker-options" role="listbox" aria-label="Opciones de facultad" hidden></div></div><select id="faculty" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div>
-<div class="academic-filter"><div class="academic-picker"><md-outlined-text-field id="careerSearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="careerOptions" autocomplete="off" value="Todas" label="Carrera / programa" no-asterisk></md-outlined-text-field><span class="picker-arrow" aria-hidden="true">⌄</span><div id="careerOptions" class="picker-options" role="listbox" aria-label="Opciones de carrera" hidden></div></div><select id="career" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div><md-text-button id="resetFilters" type="button">Limpiar filtros</md-text-button></div>
+<div class="filter-content"><div class="academic-filter"><div class="academic-picker"><md-filled-text-field id="facultySearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="facultyOptions" autocomplete="off" value="Todas" label="Facultad / unidad" no-asterisk></md-filled-text-field><span class="picker-arrow" aria-hidden="true">⌄</span><div id="facultyOptions" class="picker-options" role="listbox" aria-label="Opciones de facultad" hidden></div></div><select id="faculty" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div>
+<div class="academic-filter"><div class="academic-picker"><md-filled-text-field id="careerSearch" type="text" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="careerOptions" autocomplete="off" value="Todas" label="Carrera / programa" no-asterisk></md-filled-text-field><span class="picker-arrow" aria-hidden="true">⌄</span><div id="careerOptions" class="picker-options" role="listbox" aria-label="Opciones de carrera" hidden></div></div><select id="career" hidden aria-hidden="true" tabindex="-1"><option value="">Todas</option></select></div><md-text-button id="resetFilters" type="button">Limpiar filtros</md-text-button></div>
 </details>
 </div>
 <div id="roomForm" role="tabpanel" aria-labelledby="rooms" hidden>
 
-<div class="time-heading"><span class="hint">Horario que necesitás</span><md-text-button id="now" type="button">Desde ahora</md-text-button></div>
-<div class="time-grid"><div><md-filled-text-field id="from" type="time" value="12:00" required label="Desde" no-asterisk></md-filled-text-field></div><div><md-filled-text-field id="to" type="time" value="14:00" required label="Hasta" no-asterisk></md-filled-text-field></div></div>
-<div class="duration-heading"><md-outlined-text-field id="hours" type="text" inputmode="decimal" value="2" autocomplete="off" aria-describedby="intervalHint" label="Duración (horas)" no-asterisk></md-outlined-text-field></div>
-<div class="duration-chips" aria-label="Duración rápida"><md-filter-chip type="button" data-hours="0.5" label="30 min"></md-filter-chip><md-filter-chip type="button" data-hours="1" label="1 h"></md-filter-chip><md-filter-chip type="button" data-hours="2" label="2 h"></md-filter-chip><md-filter-chip type="button" data-hours="3" label="3 h"></md-filter-chip></div>
-<p id="intervalHint" class="hint" role="status"></p>
-<md-filled-select id="building" label="Edificio"><md-select-option value="default" selected><div slot="headline">Olivo A/B · Roble · Ceibo</div></md-select-option><md-select-option value="all"><div slot="headline">Todas las aulas</div></md-select-option></md-filled-select>
-<p class="notice">Libre = sin reservas registradas. La ocupación real puede variar.</p><md-filled-button id="seeRooms" class="primary" type="button">Buscar aulas libres</md-filled-button>
+<md-filled-tonal-button id="editTime"><span slot="icon"><!-- ICON:schedule --></span><span id="timeSummary">Ahora · 1 h</span></md-filled-tonal-button>
+<div class="duration-chips" aria-label="Duración"><md-filter-chip elevated data-hours="1" label="1 h"></md-filter-chip><md-filter-chip elevated data-hours="2" label="2 h"></md-filter-chip><md-filter-chip elevated data-hours="3" label="3 h"></md-filter-chip><md-filter-chip elevated id="customDuration" label="" aria-label="Horario personalizado"><span slot="icon"><!-- ICON:schedule --></span><span slot="selected-icon"><!-- ICON:schedule --></span></md-filter-chip></div>
 </div>
 <div id="scheduleForm" role="tabpanel" aria-labelledby="roomSchedule" hidden>
-<div class="search-wrap"><md-outlined-text-field id="roomQuery" type="search" placeholder="Ej. R2, C8.1 o Ceibo" autocomplete="off" enterkeyhint="search" label="Aula o edificio" no-asterisk><md-icon-button slot="trailing-icon" id="clearRoom" class="clear" aria-label="Borrar aula" hidden><!-- ICON:close --></md-icon-button></md-outlined-text-field></div>
+<div class="search-wrap"><md-filled-text-field id="roomQuery" type="search" placeholder="R2, C8 o Ceibo" autocomplete="off" enterkeyhint="search" label="Aula o edificio" no-asterisk><md-icon-button slot="trailing-icon" id="clearRoom" class="clear" aria-label="Borrar aula" hidden><!-- ICON:close --></md-icon-button></md-filled-text-field></div>
 
 </div>
 </section>
 <div class="results-heading"><h2 id="count">Cargando horarios…</h2><md-text-button id="top" type="button" hidden>Subir ↑</md-text-button></div>
-<div id="loading" class="loading-state" role="status" hidden><md-circular-progress indeterminate aria-label="Cargando"></md-circular-progress><p>Consultando Planning…<br><small>La primera carga puede tardar unos segundos.</small></p></div>
+<div id="loading" class="loading-state" role="status" hidden><md-circular-progress indeterminate aria-label="Cargando"></md-circular-progress><p>Cargando…</p></div>
 <div id="errorState" class="empty-state" hidden><h3>No pudimos cargar los horarios</h3><p>Revisá tu conexión a internet y volvé a intentar.</p><md-filled-button id="retry" class="primary" type="button">Reintentar</md-filled-button></div>
-<div id="results" aria-live="polite" aria-busy="true"></div><md-outlined-button id="more" class="more" type="button" hidden>Mostrar más resultados</md-outlined-button>
-<footer><a href="https://planning-campus.austral.edu.ar:44443/" rel="noopener" target="_blank">Abrir Planning Austral ↗</a><p id="timezone">Horarios de Argentina · UTC−3<br>Consulta pública · Sin iniciar sesión</p></footer>
+<div id="results" aria-live="polite" aria-busy="true"></div><md-filled-tonal-button id="more" class="more" type="button" hidden>Mostrar más resultados</md-filled-tonal-button>
+
 </main>
 <md-navigation-bar class="tabs" id="navigation" aria-label="Qué querés buscar">
 <md-navigation-tab id="subjects" label="Materias" aria-controls="subjectForm"><span slot="inactive-icon"><!-- ICON:menu_book --></span><span slot="active-icon"><!-- ICON:menu_book --></span></md-navigation-tab>
 <md-navigation-tab id="rooms" label="Aulas libres" aria-controls="roomForm"><span slot="inactive-icon"><!-- ICON:meeting_room --></span><span slot="active-icon"><!-- ICON:meeting_room --></span></md-navigation-tab>
 <md-navigation-tab id="roomSchedule" label="Por aula" aria-controls="scheduleForm"><span slot="inactive-icon"><!-- ICON:event_note --></span><span slot="active-icon"><!-- ICON:event_note --></span></md-navigation-tab>
 </md-navigation-bar>
+<md-dialog id="settingsDialog" aria-label="Ajustes de búsqueda"><div slot="headline">Ajustes</div><div slot="content" class="dialog-content"><section class="context" aria-label="Fecha y campus">
+<md-filled-select id="campus" label="Campus"><md-select-option value="Pilar" selected><div slot="headline">Pilar</div></md-select-option><md-select-option value="Bs. As."><div slot="headline">Buenos Aires</div></md-select-option><md-select-option value="Rosario"><div slot="headline">Rosario</div></md-select-option><md-select-option value=""><div slot="headline">Todos</div></md-select-option></md-filled-select>
+<div class="date-field"><md-filled-text-field id="date" type="date" required aria-describedby="timezone" label="Fecha" no-asterisk></md-filled-text-field><div class="date-shortcuts"><md-filled-tonal-button id="today" type="button">Hoy</md-filled-tonal-button><md-filled-tonal-button id="tomorrow" type="button">Mañana</md-filled-tonal-button></div></div>
+</section>
+<md-filled-select id="building" label="Edificio"><md-select-option value="default" selected><div slot="headline">Olivo A/B · Roble · Ceibo</div></md-select-option><md-select-option value="all"><div slot="headline">Todas las aulas</div></md-select-option></md-filled-select><md-text-button id="theme">Tema claro</md-text-button><md-text-button href="https://planning-campus.austral.edu.ar:44443/" target="_blank">Planning Austral ↗</md-text-button><span id="timezone" class="visually-hidden">Horarios de Argentina, UTC−3</span></div><div slot="actions"><md-filled-button id="closeSettings">Listo</md-filled-button></div></md-dialog>
+<md-dialog id="timeDialog" aria-label="Horario personalizado"><div slot="headline">Horario</div><div slot="content" class="dialog-content"><md-filled-tonal-button id="now">Desde ahora</md-filled-tonal-button><div class="time-grid"><div><md-filled-text-field id="from" type="time" value="12:00" required label="Desde" no-asterisk></md-filled-text-field></div><div><md-filled-text-field id="to" type="time" value="14:00" required label="Hasta" no-asterisk></md-filled-text-field></div></div><md-filled-text-field id="hours" type="text" inputmode="decimal" value="1" autocomplete="off" aria-describedby="intervalHint" label="Duración (horas)" no-asterisk></md-filled-text-field><p id="intervalHint" role="status" class="hint"></p></div><div slot="actions"><md-filled-button id="closeTime">Listo</md-filled-button></div></md-dialog>
 <script>/* MATERIAL_SCRIPT */</script>
 <script>(async () => {
-await Promise.all([...document.querySelectorAll('md-filled-select, md-select-option, md-navigation-bar, md-navigation-tab, md-outlined-text-field, md-filled-text-field')].map(element => element.updateComplete));
+await Promise.all([...document.querySelectorAll('md-filled-select, md-select-option, md-navigation-bar, md-navigation-tab, md-filled-text-field')].map(element => element.updateComplete));
 /* PLANNING_SCRIPT */
+/* ROOM_GROUPS_SCRIPT */
 /* MOBILE_SCRIPT */
 })();</script>
 </body></html>

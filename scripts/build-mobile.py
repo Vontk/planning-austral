@@ -15,6 +15,10 @@ script = script.replace("syncEnd(); load();\n", "syncEnd();\n")
 script = script.replace("for (const id of ['q', 'roomQuery', 'building']) $(id).addEventListener('input', render);", "")
 # Event listeners must resolve the mobile render wrapper at event time.
 script = script.replace("addEventListener('input', render)", "addEventListener('input', () => render())").replace("addEventListener('change', render)", "addEventListener('change', () => render())")
+script = script.replace('const found = data.bookings.filter', 'const found = mergeSubjectBookings(data.bookings.filter')
+script = script.replace('.sort((a, b) => a.score - b.score || a.start - b.start);', '.sort((a, b) => a.score - b.score || a.start - b.start), data.rooms);')
+script = script.replace('room ? link(room) : null, b.description', 'b.displayRoom ? null : room ? link(room) : null, b.description')
+script = script.replace('[b.room, academicLabel(b)]', '[shortBookingRoom(b, data.rooms), academicLabel(b)]')
 script = script.replace("$('hours').setAttribute('aria-invalid', String(!range));", "$('hours').error = !range;")
 # Official navigation handles focus, keyboard operation and selected state.
 start_nav = script.index('for (const tab of tabs) {')
@@ -32,14 +36,14 @@ script = script.replace("let savedTheme = 'dark';", "let savedTheme = matchMedia
 script = script.replace("setTheme(savedTheme);", "setTheme(window.campusNativeTheme || savedTheme);")
 script = script.replace("  try { localStorage.setItem('campus-theme', theme); } catch {}", "  if (!window.campusNativeTheme) try { localStorage.setItem('campus-theme', theme); } catch {}")
 template = (ROOT / 'mobile/index.html').read_text()
-for icon in ['menu_book', 'meeting_room', 'event_note', 'close']:
+for icon in ['menu_book', 'meeting_room', 'event_note', 'close', 'settings', 'schedule']:
     svg = (ROOT / 'mobile/icons' / (icon + '.svg')).read_text()
     svg = re.sub(r'fill="[^"]*"', 'fill="currentColor"', svg)
     svg = svg.replace('<svg ', '<svg aria-hidden="true" ', 1)
     template = template.replace('<!-- ICON:' + icon + ' -->', svg)
 material = subprocess.run([str(ROOT / 'mobile/node_modules/.bin/esbuild'), str(ROOT / 'mobile/material.js'),
     '--bundle', '--minify', '--format=iife', '--target=chrome89', '--supported:template-literal=false', '--legal-comments=none'], check=True, capture_output=True, text=True).stdout
-result = template.replace('/* MATERIAL_SCRIPT */', material).replace('/* MOBILE_STYLE */', (ROOT / 'mobile/style.css').read_text()).replace('/* PLANNING_SCRIPT */', script).replace('/* MOBILE_SCRIPT */', (ROOT / 'mobile/app.js').read_text())
+result = template.replace('/* MATERIAL_SCRIPT */', material).replace('/* MOBILE_STYLE */', (ROOT / 'mobile/style.css').read_text()).replace('/* PLANNING_SCRIPT */', script).replace('/* ROOM_GROUPS_SCRIPT */', (ROOT / 'mobile/rooms.js').read_text()).replace('/* MOBILE_SCRIPT */', (ROOT / 'mobile/app.js').read_text())
 output = ROOT / 'android/app/src/main/assets/index.html'
 output.write_text(result)
 (output.parent / 'logo.svg').write_bytes((ROOT / 'logo.svg').read_bytes())

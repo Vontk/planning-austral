@@ -26,7 +26,7 @@ jobs:
       - run: sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
       - run: npm ci --prefix mobile
       - run: python3 scripts/build-mobile.py && git diff --exit-code -- android/app/src/main/assets
-      - run: node tests/app.test.cjs && python3 -m unittest discover -s tests
+      - run: node tests/app.test.cjs && node tests/mobile-rooms.test.cjs && python3 -m unittest discover -s tests
       - run: cd mobile && npx playwright install --with-deps chromium
       - run: NODE_PATH="$PWD/mobile/node_modules" node tests/mobile.cjs
       - uses: gradle/actions/setup-gradle@v4

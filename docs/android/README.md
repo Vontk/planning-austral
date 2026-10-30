@@ -2,6 +2,16 @@
 
 Install the signed APK from [GitHub Releases](https://github.com/Vontk/planning-austral/releases/latest). Android 8.0+ (API 26), internet, and a recent Android System WebView are required. No Python or computer is needed. Allow installation from the browser or file manager when Android prompts.
 
+## Android 2.1.0
+
+The interface starts in Aulas libres with today's Argentina date, the opening time and a one-hour interval. Campus preference remains local; old saved dates, modes and intervals no longer override the initial search. The gear opens official Material settings for campus/date/building; a clock opens custom start/end/duration controls. Quick durations are 1/2/3 hours plus an icon-only custom clock chip with an accessible label. Filled tonal controls and rounded result cards replace outlined actions. Tutorial copy, the footer and the Sync marker are removed.
+
+Room labels use their codes (A1, B2, C8.1, R2) without changing source identities. Exactly two known halves, .1 and .2 in the same building/campus, merge for a free-room interval only when both are confirmed free. Daily schedules merge only if every reservation's times, title, classification and details match; identical subject bookings also collapse into one result. Unknown mappings, extra subdivisions, occupied halves and differing schedules stay separate. The earliest known next reservation is shown for a merged free room.
+
+Ten presentation/grouping tests and browser integration cases cover these rules, alongside the existing engine and mobile workflows. The image below uses synthetic data and browser rendering. The signed APK uses the existing release key and versionCode 5.
+
+![Minimalist interface preview](preview-minimal.png)
+
 ## Android 2.0.1
 
 The remaining CSS-drawn controls were replaced with official `@material/web` components: outlined search and academic text fields, filled campus/building selects and options, filled date/time text fields wrapping the browser inputs, icon buttons, circular progress, and navigation bar/tabs. Navigation comes from the package's official **labs** modules (experimental upstream), not a custom replica. Buttons and filter chips remain official components. The layout and result lists are app-specific. Calendar/time picker dialogs continue to come from Android WebView; Material Web lists date/time input types as partially supported, and their Android dialogs still require device verification.
@@ -61,7 +71,7 @@ The APK uses a bundled WebView interface on `https://appassets.androidplatform.n
 The private key is never committed. Supply `CAMPUS_SIGNING_DIR` containing `release.p12` (alias `campuslookup`) and a `password` file, then run:
 
 ```sh
-ANDROID_HOME=/path/to/sdk CAMPUS_SIGNING_DIR=/private/signing scripts/sign-android.sh 2.0.1
+ANDROID_HOME=/path/to/sdk CAMPUS_SIGNING_DIR=/private/signing scripts/sign-android.sh 2.1.0
 ```
 
 The script aligns, signs, verifies, and hashes the APK into ignored `artifacts/`. Preserve the original key for compatible updates. GitHub Actions verifies branches, PRs, and `android-v*` tags and produces unsigned build artifacts. Sign verified builds locally, then attach the signed APK and SHA256SUMS to the GitHub release. Signing credentials stay local in the ignored `.signing/` directory; keep a private backup. Bump versionCode/versionName in `android/app/build.gradle.kts` before a subsequent tag.
