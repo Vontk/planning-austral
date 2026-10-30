@@ -15,14 +15,28 @@ script = script.replace("syncEnd(); load();\n", "syncEnd();\n")
 script = script.replace("for (const id of ['q', 'roomQuery', 'building']) $(id).addEventListener('input', render);", "")
 # Event listeners must resolve the mobile render wrapper at event time.
 script = script.replace("addEventListener('input', render)", "addEventListener('input', () => render())").replace("addEventListener('change', render)", "addEventListener('change', () => render())")
+script = script.replace("$('hours').setAttribute('aria-invalid', String(!range));", "$('hours').error = !range;")
+# Official navigation handles focus, keyboard operation and selected state.
+start_nav = script.index('for (const tab of tabs) {')
+end_nav = script.index("addEventListener('online', load);", start_nav)
+script = script[:start_nav] + script[end_nav:]
+script = script.replace("$(id).setAttribute('aria-selected', String(mode === id)); $(id).tabIndex = mode === id ? 0 : -1;", "$(id).active = mode === id;")
+# Picker choices use official Material actions, preserving the shared matching logic.
+script = script.replace("document.createElement('button')", "document.createElement('md-text-button')")
 # Bound DOM allocation to the visible page instead of creating every hidden card.
 for loop in ['for (const b of found)', 'for (const {room} of found)', 'for (const {room, next} of free)']:
     script = script.replace(loop, loop.replace('of found', 'of pageResults(found)').replace('of free', 'of pageResults(free)'))
+script = script.replace("theme === 'dark' ? '#9cdcfe' : '#246b93'", "theme === 'dark' ? '#e3e2e6' : '#46464f'")
 # Native Android always follows system appearance; browser previews retain the theme control.
 script = script.replace("let savedTheme = 'dark';", "let savedTheme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';")
 script = script.replace("setTheme(savedTheme);", "setTheme(window.campusNativeTheme || savedTheme);")
 script = script.replace("  try { localStorage.setItem('campus-theme', theme); } catch {}", "  if (!window.campusNativeTheme) try { localStorage.setItem('campus-theme', theme); } catch {}")
 template = (ROOT / 'mobile/index.html').read_text()
+for icon in ['menu_book', 'meeting_room', 'event_note', 'close']:
+    svg = (ROOT / 'mobile/icons' / (icon + '.svg')).read_text()
+    svg = re.sub(r'fill="[^"]*"', 'fill="currentColor"', svg)
+    svg = svg.replace('<svg ', '<svg aria-hidden="true" ', 1)
+    template = template.replace('<!-- ICON:' + icon + ' -->', svg)
 material = subprocess.run([str(ROOT / 'mobile/node_modules/.bin/esbuild'), str(ROOT / 'mobile/material.js'),
     '--bundle', '--minify', '--format=iife', '--target=chrome89', '--supported:template-literal=false', '--legal-comments=none'], check=True, capture_output=True, text=True).stdout
 result = template.replace('/* MATERIAL_SCRIPT */', material).replace('/* MOBILE_STYLE */', (ROOT / 'mobile/style.css').read_text()).replace('/* PLANNING_SCRIPT */', script).replace('/* MOBILE_SCRIPT */', (ROOT / 'mobile/app.js').read_text())

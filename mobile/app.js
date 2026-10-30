@@ -24,6 +24,8 @@ $('building').disabled = $('campus').value !== 'Pilar';
 if ($('building').disabled) $('building').value = 'all';
 
 function syncChrome() {
+  $('navigation').activeIndex = tabs.indexOf(mode);
+  $('pageTitle').textContent = {subjects:'Materias', rooms:'Aulas libres', roomSchedule:'Por aula'}[mode];
   const busy = Boolean(pendingKey), failed = failedKey === scope().key && !data;
   $('loading').hidden = !busy || Boolean(data);
   $('errorState').hidden = !failed;
@@ -49,7 +51,7 @@ render = function() {
   cards.forEach(element => {
     if (mode === 'rooms') {
       const name = element.querySelector('h3').textContent;
-      const button = document.createElement('button');
+      const button = document.createElement('md-outlined-button');
       button.type = 'button'; button.className = 'schedule-action'; button.textContent = 'Ver horarios del aula →';
       button.onclick = () => {
         $('roomQuery').value = roomCode({name}) || name;
@@ -68,10 +70,13 @@ function selectMobileTab(tab) {
   visibleLimit = 30;
   document.activeElement?.blur();
   selectTab(tab);
-  document.querySelector('.search-panel').scrollIntoView({block: 'start'});
+  window.scrollTo({top: 0});
   savePreferences();
 }
-for (const tab of tabs) $(tab).onclick = () => selectMobileTab(tab);
+$('navigation').addEventListener('navigation-bar-activated', event => {
+  const tab = tabs[event.detail.activeIndex];
+  if (tab && tab !== mode) selectMobileTab(tab);
+});
 $('refresh').onclick = $('retry').onclick = () => load();
 $('seeRooms').onclick = () => { document.activeElement?.blur(); document.querySelector('.results-heading').scrollIntoView({block:'start'}); };
 $('more').onclick = () => { visibleLimit += 30; render(); };

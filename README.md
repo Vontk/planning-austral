@@ -4,9 +4,9 @@ Buscador de aulas de materias, aulas vacías y cronogramas por aula de Austral. 
 
 ## Android
 
-Descargá **campus-lookup-2.0.0.apk** desde [GitHub Releases](https://github.com/Vontk/planning-austral/releases/latest) y abrilo en tu teléfono. Si Android lo pide, habilitá la instalación desde tu navegador o gestor de archivos. Requiere internet y Android System WebView actualizado; no requiere Python ni una computadora.
+Descargá **campus-lookup-2.0.1.apk** desde [GitHub Releases](https://github.com/Vontk/planning-austral/releases/latest) y abrilo en tu teléfono. Si Android lo pide, habilitá la instalación desde tu navegador o gestor de archivos. Requiere internet y Android System WebView actualizado; no requiere Python ni una computadora.
 
-Interfaz Material 3 con controles oficiales Material Web, navegación inferior, filtros y acceso al horario de cada aula. Sigue el modo claro/oscuro del sistema y, en Android 12+, la paleta seleccionada en el teléfono. El contenido respeta las barras del sistema, el recorte de cámara y el teclado. Solo requiere permiso de internet. [Diseño, capturas, compilación y verificación](docs/android/README.md).
+Interfaz Material 3 con campos, selectores, botones y navegación oficiales Material Web, navegación inferior, filtros y acceso al horario de cada aula. Sigue el modo claro/oscuro del sistema y, en Android 12+, los acentos de la paleta seleccionada en el teléfono, sobre fondos neutros. El contenido respeta las barras del sistema, el recorte de cámara y el teclado. Solo requiere permiso de internet. [Diseño, capturas, compilación y verificación](docs/android/README.md).
 
 La versión de escritorio requiere **Python 3.10+**, internet y un navegador moderno.
 

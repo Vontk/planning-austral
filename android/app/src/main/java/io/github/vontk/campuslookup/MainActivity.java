@@ -1,11 +1,13 @@
 package io.github.vontk.campuslookup;
 
 import android.annotation.SuppressLint;
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Insets;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.view.View;
@@ -41,14 +43,13 @@ public class MainActivity extends Activity {
         super.onCreate(state);
         boolean dark = (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
             == Configuration.UI_MODE_NIGHT_YES;
-        int background = dark ? 0xff141218 : 0xfffef7ff;
-        if (Build.VERSION.SDK_INT >= 31) background = getColor(dark
-            ? android.R.color.system_neutral1_900 : android.R.color.system_neutral1_10);
+        int background = dark ? 0xff0e0e0e : 0xfffaf9fd;
+        int navigationSurface = dark ? 0xff19191c : 0xffeeedf2;
         if (Build.VERSION.SDK_INT < 35) {
             getWindow().setStatusBarColor(background);
-            getWindow().setNavigationBarColor(background);
+            getWindow().setNavigationBarColor(Build.VERSION.SDK_INT >= 27 ? navigationSurface : 0xff19191c);
         }
-        FrameLayout container = new FrameLayout(this);
+        SafeAreaLayout container = new SafeAreaLayout(this, navigationSurface);
         container.setBackgroundColor(background);
         web = new WebView(this);
         web.setBackgroundColor(background);
@@ -78,6 +79,7 @@ public class MainActivity extends Activity {
             getWindow().getDecorView().setSystemUiVisibility(dark ? 0 :
                 View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR | (Build.VERSION.SDK_INT >= 27 ? View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR : 0));
         }
+        if (Build.VERSION.SDK_INT >= 29) getWindow().setNavigationBarContrastEnforced(false);
         container.requestApplyInsets();
         WebSettings settings = web.getSettings();
         settings.setJavaScriptEnabled(true);
@@ -119,25 +121,15 @@ public class MainActivity extends Activity {
         return "<style>" + css + "</style><script>window.campusNativeTheme='" + (dark ? "dark" : "light") + "';</script>";
     }
 
-    @TargetApi(31)
     private String dynamicPalette(boolean dark) {
-        String[] names = {"--background", "--text", "--surface", "--input", "--line", "--muted", "--blue", "--purple", "--green", "--orange", "--secondary", "--selected", "--on-primary"};
+        if (Build.VERSION.SDK_INT < 31) return "";
+        String[] names = {"--blue", "--purple", "--green", "--on-primary"};
         int[] resources = dark ? new int[] {
-            android.R.color.system_neutral1_900, android.R.color.system_neutral1_50,
-            android.R.color.system_neutral1_800, android.R.color.system_neutral2_800,
-            android.R.color.system_neutral2_500, android.R.color.system_neutral2_200,
             android.R.color.system_accent1_200, android.R.color.system_accent2_200,
-            android.R.color.system_accent3_200, android.R.color.system_accent3_200,
-            android.R.color.system_neutral2_100, android.R.color.system_accent2_700,
-            android.R.color.system_accent1_800
+            android.R.color.system_accent3_200, android.R.color.system_accent1_800
         } : new int[] {
-            android.R.color.system_neutral1_10, android.R.color.system_neutral1_900,
-            android.R.color.system_neutral1_50, android.R.color.system_neutral2_100,
-            android.R.color.system_neutral2_500, android.R.color.system_neutral2_600,
             android.R.color.system_accent1_600, android.R.color.system_accent2_600,
-            android.R.color.system_accent3_600, android.R.color.system_accent3_600,
-            android.R.color.system_neutral2_700, android.R.color.system_accent2_100,
-            android.R.color.system_accent1_0
+            android.R.color.system_accent3_600, android.R.color.system_accent1_0
         };
         StringBuilder css = new StringBuilder();
         for (int i = 0; i < names.length; i++) {
@@ -145,6 +137,20 @@ public class MainActivity extends Activity {
                 "#%06x", getColor(resources[i]) & 0xffffff)).append(';');
         }
         return css.toString();
+    }
+
+    /** Paint the gesture inset as part of the navigation surface, without moving touch targets into it. */
+    private static final class SafeAreaLayout extends FrameLayout {
+        private final Paint navigationPaint = new Paint();
+        SafeAreaLayout(Context context, int navigationSurface) {
+            super(context);
+            navigationPaint.setColor(navigationSurface);
+            setWillNotDraw(false);
+        }
+        @Override protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+            canvas.drawRect(0, getHeight() - getPaddingBottom(), getWidth(), getHeight(), navigationPaint);
+        }
     }
 
     private void openExternal(Uri uri) {

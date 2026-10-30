@@ -2,7 +2,17 @@
 
 Install the signed APK from [GitHub Releases](https://github.com/Vontk/planning-austral/releases/latest). Android 8.0+ (API 26), internet, and a recent Android System WebView are required. No Python or computer is needed. Allow installation from the browser or file manager when Android prompts.
 
-## Android 2.0.0
+## Android 2.0.1
+
+The remaining CSS-drawn controls were replaced with official `@material/web` components: outlined search and academic text fields, filled campus/building selects and options, filled date/time text fields wrapping the browser inputs, icon buttons, circular progress, and navigation bar/tabs. Navigation comes from the package's official **labs** modules (experimental upstream), not a custom replica. Buttons and filter chips remain official components. The layout and result lists are app-specific. Calendar/time picker dialogs continue to come from Android WebView; Material Web lists date/time input types as partially supported, and their Android dialogs still require device verification.
+
+Icons are official Google Material Symbols SVGs included locally. No icon font, CDN or new permissions. Component initialization completes before the Planning engine starts. The navigation component now owns keyboard focus and selection behavior. Tests verify actual shadow-root controls, typed text visibility after transitions, dropdown changes and accessibility scaling through Material typography tokens.
+
+The dark reference palette uses `#0e0e0e` for content and `#19191c` for navigation. Neutrals and navigation selection stay subdued; action accents still come from the Android system palette. The header displays the current page and removes the redundant subtitle and large secondary title.
+
+The native safe-area container paints its bottom inset with the navigation surface color, while keeping WebView controls above that inset. This removes the contrasting strip under the bottom bar; status bar and camera-safe padding remain intact. Android 8.0 retains a dark system navigation area for visible system icons.
+
+## Android 2.0.0 · previous iteration
 
 The Android interface was redesigned around Material 3: system sans-serif typography, tonal surfaces, rounded search fields, filled and outlined actions, filter chips, and a navigation bar with pill-shaped selection indicators. Official Material Web buttons, chips and ripples are bundled locally with Lit; only the used components are imported and minified. There are no remote fonts, CDN requests or additional Android permissions. Native date/time pickers remain provided by the system WebView.
 
@@ -18,11 +28,15 @@ Chromium checks cover 320, 360, 390, 412 and 768 px, enlarged controls, both the
 | --- | --- | --- |
 | ![Materias](materias.png) | ![Aulas libres](libres.png) | ![Aula claro](aula-claro.png) |
 
-## Ícono de Android
+## Android launcher and platform review · 2.0.1
 
-Desde 1.0.1 el launcher usa un ícono adaptativo: fondo oscuro opaco en toda la máscara, lupa celeste dentro de la zona segura y variante monocromática para Android 13+. `icon` y `roundIcon` apuntan al mismo recurso adaptativo para evitar el fondo blanco que algunos launchers agregan a los íconos antiguos.
+The default adaptive icon now uses `#0e0e0e` and `#e3e2e6`, matching the interface. A transparent monochrome vector lets Android 13+ launchers apply the user's wallpaper palette in themed-icon mode. Both `icon` and `roundIcon` resolve to the same adaptive resource, including its monochrome layer. Older Android versions ignore that newer layer. The 108 dp vector keeps its foreground within the central 66 dp safe zone and requires no raster-density copies.
 
-![Vista previa del ícono con máscaras circular, redondeada y superelipse](icono.png)
+![Normal, circular and illustrative themed icons](icono.png)
+
+The themed colors in this preview are illustrative; the launcher chooses the actual colors. Users must enable themed icons in a supporting launcher. See [Android adaptive icons](https://developer.android.com/develop/ui/views/launch/icon_design_adaptive).
+
+The review covered icon resources, system-bar/cutout/IME handling, system theme, control labels/focus/touch targets, permission scope and backup settings. Explicit Android 12+ cloud-backup and device-transfer exclusions now match `allowBackup=false`, and legacy cloud backups remain disabled. Only INTERNET is declared; there are no notification, storage, location, wallpaper-read or boot permissions. No new runtime library was added to the native wrapper. A clean release build, native tests and Android Lint passed with **no issues found**. This is a scoped project review, not certification of all Android requirements; TalkBack, launcher theming, installation and gesture behavior still require physical-device checks.
 
 ## Build
 
@@ -47,7 +61,7 @@ The APK uses a bundled WebView interface on `https://appassets.androidplatform.n
 The private key is never committed. Supply `CAMPUS_SIGNING_DIR` containing `release.p12` (alias `campuslookup`) and a `password` file, then run:
 
 ```sh
-ANDROID_HOME=/path/to/sdk CAMPUS_SIGNING_DIR=/private/signing scripts/sign-android.sh 2.0.0
+ANDROID_HOME=/path/to/sdk CAMPUS_SIGNING_DIR=/private/signing scripts/sign-android.sh 2.0.1
 ```
 
 The script aligns, signs, verifies, and hashes the APK into ignored `artifacts/`. Preserve the original key for compatible updates. GitHub Actions verifies branches, PRs, and `android-v*` tags and produces unsigned build artifacts. Sign verified builds locally, then attach the signed APK and SHA256SUMS to the GitHub release. Signing credentials stay local in the ignored `.signing/` directory; keep a private backup. Bump versionCode/versionName in `android/app/build.gradle.kts` before a subsequent tag.
